@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#0B0F1E">
+<title>陈传杰 · 能力自述</title>
+<style>
+:root{
+  --bg:#0B0F1E; --ink:#ECECED; --muted:#97989A; --spark:#4FD1C5; --flow:#3B2E7E;
+  --line:rgba(236,236,237,.13);
+  --rail:28px;
+  --sans:'HarmonyOS Sans SC','PingFang SC','Microsoft YaHei',system-ui,sans-serif;
+  --mono:'Space Grotesk','SF Mono',Consolas,ui-monospace,monospace;
+}
+@media (min-width:860px){ :root{ --rail:140px } }
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 14px/1.8 var(--sans);overflow-x:hidden}
+
+.aurora{position:fixed;inset:0;z-index:0;pointer-events:none;background:
+  radial-gradient(90vw 60vw at 8% -6%,rgba(59,46,126,.60),transparent 62%),
+  radial-gradient(70vw 50vw at 100% 12%,rgba(79,209,197,.10),transparent 60%),
+  radial-gradient(100vw 70vw at 40% 62%,rgba(59,46,126,.20),transparent 70%),
+  radial-gradient(70vw 50vw at -10% 100%,rgba(79,209,197,.08),transparent 65%);}
+
+.shell{position:relative;z-index:2;max-width:760px;margin:0 auto;padding:0 20px}
+
+/* 顶部状态行 */
+.status{display:flex;align-items:center;gap:8px;padding:22px 0 0;
+  font:700 12px/1 var(--mono);letter-spacing:.14em;color:var(--muted)}
+.status i{width:7px;height:7px;border-radius:50%;background:var(--spark);box-shadow:0 0 10px var(--spark);animation:pulse 2.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.30}}
+
+/* 第一屏 */
+.intro{padding:56px 0 24px}
+.intro .who{font:700 44px/1.1 var(--sans);letter-spacing:-.02em;margin:0 0 16px}
+.intro .where{font:400 14px/1.7 var(--sans);color:var(--muted);margin:0 0 28px}
+.intro .lead{font:400 16px/1.75 var(--sans);color:var(--ink);margin:0;max-width:34em}
+.intro .lead b{color:var(--spark);font-weight:700}
+
+/* 链路轨道 */
+.track{position:relative;margin-top:56px;padding-bottom:8px}
+.track .rail{position:absolute;left:var(--rail);top:0;bottom:0;width:1px;background:var(--line)}
+.track .rail span{position:absolute;left:-1px;width:3px;height:64px;border-radius:2px;
+  background:linear-gradient(180deg,transparent,rgba(79,209,197,.95),transparent);
+  animation:flow 5.2s linear infinite}
+@keyframes flow{0%{top:-64px;opacity:0}12%{opacity:1}88%{opacity:1}100%{top:100%;opacity:0}}
+
+/* 节点 */
+.node{position:relative;padding-left:calc(var(--rail) + 40px);padding-bottom:76px}
+.node:last-child{padding-bottom:40px}
+.node::before{content:"";position:absolute;left:calc(var(--rail) - 6px);top:8px;
+  width:13px;height:13px;border-radius:50%;background:var(--bg);
+  border:2px solid var(--line);transition:border-color .6s,box-shadow .6s}
+.node.on::before{border-color:var(--spark);box-shadow:0 0 14px rgba(79,209,197,.75)}
+.node .tag{font:700 12px/1 var(--mono);letter-spacing:.14em;color:var(--spark)}
+.node h2{font:700 24px/1.35 var(--sans);margin:12px 0 14px;letter-spacing:-.01em}
+.node .say{color:var(--muted);margin:0 0 20px;max-width:32em}
+.node .say b{color:var(--ink);font-weight:700}
+
+/* 行式清单：不用卡片 */
+.list{margin:0}
+.list .it{display:flex;gap:18px;padding:14px 0;border-bottom:1px solid var(--line);align-items:baseline}
+.list .it:last-child{border-bottom:0}
+.list .it .k{flex:0 0 5.5em;font:700 14px/1.8 var(--sans);color:var(--ink)}
+.list .it .v{flex:1;color:var(--muted)}
+.list .it .v b{color:var(--ink);font-weight:700}
+
+/* 结尾 */
+.tail{margin-top:8px;padding:34px 0 64px;font:700 12px/1 var(--mono);letter-spacing:.16em;color:var(--muted);text-align:center}
+
+@media (max-width:520px){
+  .intro{padding:44px 0 18px}
+  .intro .who{font-size:34px}
+  .intro .lead{font-size:15px}
+  .node{padding-bottom:60px}
+  .node h2{font-size:20px}
+  .list .it{flex-direction:column;gap:2px}
+  .list .it .k{flex:none}
+}
+</style>
+</head>
+<body>
+<div class="aurora" aria-hidden="true"></div>
+
+<div class="shell">
+  <p class="status"><i></i><span id="st">在线 · 这页就是一个 HTML 文件</span></p>
+
+  <header class="intro">
+    <h1 class="who">陈传杰</h1>
+    <p class="where">苏州农业职业技术学院 · 物联网应用技术 · 5+0 分段培养</p>
+    <p class="lead">这一页是我自己写的：<b>一个文件、没有外部库、断网也能打开</b>。往下滑，看看里面有什么。</p>
+  </header>
+
+  <div class="track">
+    <div class="rail" aria-hidden="true"><span></span></div>
+
+    <section class="node">
+      <p class="tag">01 — 能做什么</p>
+      <h2>我会的三件事</h2>
+      <div class="list">
+        <div class="it"><span class="k">写页面</span><span class="v">比赛介绍页、报名收集页、活动通知页。<b>手机上打开不走样</b>，能发链接，也能生成二维码贴出去。</span></div>
+        <div class="it"><span class="k">整材料</span><span class="v">表格、文档、汇报用的 PPT。一堆散的东西汇总成<b>一份能直接交、能直接打印</b>的成品。</span></div>
+        <div class="it"><span class="k">修电脑</span><span class="v">系统装不上、软件报错、投影接不上、外设不认。<b>先看后修</b>，不乱推荐要花钱的东西。</span></div>
+      </div>
+    </section>
+
+    <section class="node">
+      <p class="tag">02 — 这一页本身</p>
+      <h2>它就是样品</h2>
+      <p class="say">说"会做网页"的人很多，<b>把东西直接摆出来的人不多</b>。这一页就是我摆出来的东西，三件事都能验证：</p>
+      <div class="list">
+        <div class="it"><span class="k">零依赖</span><span class="v">没有外部库、没有 CDN、没有加载不出来的字体。整个页面<b>只有一个文件</b>，拷到 U 盘里照样能打开。</span></div>
+        <div class="it"><span class="k">手机优先</span><span class="v">窄屏自动换单列，字号、间距、点按区域都按手机调过，<b>不是桌面版缩小</b>。</span></div>
+        <div class="it"><span class="k">能查</span><span class="v">浏览器里按 F12 就是全部代码，<b>没混淆、没加密</b>——因为没必要。</span></div>
+      </div>
+    </section>
+
+    <section class="node">
+      <p class="tag">03 — 怎么做事</p>
+      <h2>我的做法</h2>
+      <div class="list">
+        <div class="it"><span class="k">先问清楚</span><span class="v">交什么格式、什么时候要、给谁看。问明白再动手，省得返工。</span></div>
+        <div class="it"><span class="k">中途给草稿</span><span class="v">不憋到最后一天。先出一版看得见的东西，方向不对当场改。</span></div>
+        <div class="it"><span class="k">交完附说明</span><span class="v">做了什么、哪里还能再改，一页纸讲清楚。做不了的事当场说，不硬扛。</span></div>
+      </div>
+    </section>
+
+    <section class="node">
+      <p class="tag">04 — 怎么联系</p>
+      <h2>找我</h2>
+      <div class="list">
+        <div class="it"><span class="k">微信</span><span class="v">残情久忆</span></div>
+        <div class="it"><span class="k">时间</span><span class="v">按课表排，提前说一声就能定</span></div>
+        <div class="it"><span class="k">地点</span><span class="v">校内</span></div>
+      </div>
+    </section>
+  </div>
+
+  <p class="tail">— 信号到此为止 —</p>
+</div>
+
+<script>
+(function(){
+  /* 只在支持时做增强；内容默认就是可见的 */
+  var nodes = document.querySelectorAll('.node');
+  if ('IntersectionObserver' in window){
+    var io = new IntersectionObserver(function(es){
+      es.forEach(function(e){ if (e.isIntersecting) e.target.classList.add('on'); });
+    }, {threshold:.25});
+    nodes.forEach(function(n){ io.observe(n); });
+  } else {
+    nodes.forEach(function(n){ n.classList.add('on'); });
+  }
+})();
+</script>
+</body>
+</html>
