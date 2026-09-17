@@ -105,6 +105,22 @@ body{margin:0;background:var(--bg);color:var(--ink);font:400 14px/1.75 var(--san
 .tech details[open] summary::before{content:"▾ "}
 .tech ul{margin:10px 0 2px;padding-left:18px;font-size:13px;color:var(--muted)}
 .tech li{margin:6px 0}
+.route{padding:8px 14px 4px}
+.rt{display:grid;grid-template-columns:26px 5.5em 1fr 76px;align-items:center;gap:10px;
+  padding:9px 0;border-bottom:1px solid var(--line);font-size:13px}
+.rt:last-child{border-bottom:0}
+.rt .rn{font:700 11px/1 var(--mono);color:var(--muted)}
+.rt .rk{font-weight:700;color:var(--ink)}
+.rt .rv{color:var(--muted);font-size:12px}
+.rt .rb{height:4px;border-radius:2px;background:rgba(236,236,237,.10);overflow:hidden}
+.rt .rb i{display:block;height:100%;background:rgba(151,152,154,.6)}
+.rt .rb.hi i{background:var(--spark);box-shadow:0 0 8px rgba(79,209,197,.7)}
+.chain2{padding:12px 14px 4px}
+.c2{display:flex;justify-content:space-between;gap:14px;align-items:baseline;padding:10px 12px;
+  border:1px solid var(--line);border-radius:4px;font-size:13px}
+.c2 b{color:var(--ink)}
+.c2 span{color:var(--muted);font-size:12px;text-align:right}
+.c2v{padding:5px 0 5px 14px;font:700 12px/1.5 var(--mono);color:var(--spark);letter-spacing:.08em}
 
 .tail{padding:26px 0 54px;text-align:center;font:700 11px/1.6 var(--mono);
   letter-spacing:.16em;color:var(--muted)}
@@ -117,6 +133,9 @@ body{margin:0;background:var(--bg);color:var(--ink);font:400 14px/1.75 var(--san
   .readout .cell .n{font-size:15px}
   .rows .it{flex-direction:column;gap:2px}
   .rows .it .k{flex:none}
+  .rt{grid-template-columns:24px 1fr;gap:5px 10px;align-items:baseline}
+  .rt .rv{grid-column:2}
+  .rt .rb{grid-column:2;margin-top:4px}
 }
 </style>
 </head>
@@ -201,16 +220,32 @@ body{margin:0;background:var(--bg);color:var(--ink);font:400 14px/1.75 var(--san
     </div>
   </div>
 
-  <!-- 能做什么 -->
+  <!-- 技能路线 + 体系理解 -->
   <div class="panel">
-    <div class="panel-hd"><span>06 / WHAT I WANT</span><span class="v">方向：AIoT</span></div>
-    <div class="rows">
-      <div class="it"><span class="k">最想要</span><span class="v">一个能上手的<b>项目 / 竞赛名额</b>。我不挑活——跑腿、整数据、画图、写演示页都行，只要能跟着做真东西。</span></div>
-      <div class="it"><span class="k">数据页面</span><span class="v">把数据变成能看的界面：看板、监控页、比赛演示端——评委扫码就能看，<b>手机上不走样</b>，像这一页一样单文件、零依赖。</span></div>
-      <div class="it"><span class="k">设备与现场</span><span class="v">接线、调试、装环境、跑通现场：<b>先看后修</b>，不乱推荐要花钱的东西。</span></div>
-      <div class="it"><span class="k">材料</span><span class="v">方案书、答辩 PPT、图表：一堆散的东西汇成<b>一份能直接交、能直接打印</b>的成品。</span></div>
-      <div class="it"><span class="k">做事方式</span><span class="v">先问清格式/时间/给谁看；中途给草稿；交完附说明。做不了当场讲。</span></div>
+    <div class="panel-hd"><span>06 / SKILL ROUTE</span><span class="v">方向：AIoT</span></div>
+    <div class="route">
+      <div class="rt"><span class="rn">01</span><span class="rk">编程基础</span><span class="rv">C 语言 · 正在学（专业课主线）</span><span class="rb"><i style="width:35%"></i></span></div>
+      <div class="rt"><span class="rn">02</span><span class="rk">单片机</span><span class="rv">ESP32 / STM32 · 准备上手</span><span class="rb"><i style="width:10%"></i></span></div>
+      <div class="rt"><span class="rn">03</span><span class="rk">传感器</span><span class="rv">姿态 / 加速度 · 这一页已经在读</span><span class="rb"><i style="width:45%"></i></span></div>
+      <div class="rt"><span class="rn">04</span><span class="rk">通信</span><span class="rv">串口 → Wi-Fi → MQTT · 待推进</span><span class="rb"><i style="width:12%"></i></span></div>
+      <div class="rt"><span class="rn">05</span><span class="rk">数据可视化</span><span class="rv">能独立做完 · 这一页就是</span><span class="rb hi"><i style="width:80%"></i></span></div>
+      <div class="rt"><span class="rn">06</span><span class="rk">端侧判断</span><span class="rv">滑动窗口能量法 · 这一页正在跑</span><span class="rb hi"><i style="width:65%"></i></span></div>
     </div>
+    <div class="note">现在最能打的是 <b>05 / 06</b>——把设备数据变成能看、能判断的东西。<b>01–04 我正在往前赶，缺的是有人带我上手硬件和通信。</b></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-hd"><span>07 / HOW I SEE IT</span><span class="v">我理解的一条链</span></div>
+    <div class="chain2">
+      <div class="c2"><b>设备侧</b><span>传感器 → 采集 → 端侧预处理</span></div>
+      <div class="c2v">↓</div>
+      <div class="c2"><b>传输</b><span>串口 / Wi-Fi / MQTT</span></div>
+      <div class="c2v">↓</div>
+      <div class="c2"><b>云端</b><span>存储 → 分析 → 下发</span></div>
+      <div class="c2v">↓</div>
+      <div class="c2"><b>应用侧</b><span>看板 / 告警 / 决策</span></div>
+    </div>
+    <div class="note">这一页只做了最左边那段：本机采集 + 本机判断 + 本机画出来。<br>整条链长什么样、每一段该学什么，我心里有数。</div>
   </div>
 
   <div class="panel">
@@ -230,7 +265,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font:400 14px/1.75 var(--san
   </div>
 
   <div class="panel">
-    <div class="panel-hd"><span>08 / CONTACT</span><span class="v">随时找我</span></div>
+    <div class="panel-hd"><span>09 / CONTACT</span><span class="v">随时找我</span></div>
     <div class="kv">
       <div class="r"><span class="k">微信</span><span class="v">残情久忆</span></div>
       <div class="r"><span class="k">时间</span><span class="v">按课表排，提前说一声就能定</span></div>
