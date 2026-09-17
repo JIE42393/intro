@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
@@ -175,7 +175,9 @@ section{position:relative}
 
   function fit(){
     DPR = Math.min(window.devicePixelRatio || 1, 2);
-    W = cv.clientWidth; H = cv.clientHeight;
+    W = Math.max(1, window.innerWidth || cv.clientWidth || 390);
+    H = Math.max(1, window.innerHeight || cv.clientHeight || 844);
+    cv.style.width = W + 'px'; cv.style.height = H + 'px';
     cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
     cloud.t = [];
@@ -199,12 +201,14 @@ section{position:relative}
     var w100 = g.measureText(text).width || 100;
     var fs = Math.min(cw * 0.86 / (w100 / 100), ch * 0.30);
     g.font = '700 ' + Math.floor(fs) + 'px ' + FONT;
-    g.fillText(text, cw / 2, ch * 0.46);
+    g.fillText(text, cw / 2, ch * 0.44);
     var d;
     try { d = g.getImageData(0, 0, cw, ch).data; }
     catch (e) { ok = false; return; }
     var pts = [];
-    var step = Math.max(2, Math.round(Math.sqrt(cw * ch / 2600)));
+    var ink = 0;
+    for (var yy = 0; yy < ch; yy += 2){ for (var xx = 0; xx < cw; xx += 2){ if (d[(yy * cw + xx) * 4 + 3] > 140) ink++; } }
+    var step = Math.max(2, Math.round(Math.sqrt(Math.max(1, ink) * 4 / 1300)));
     for (var y = 0; y < ch; y += step){
       for (var x = 0; x < cw; x += step){
         if (d[(y * cw + x) * 4 + 3] > 140) pts.push({ x: x / s, y: y / s });
@@ -214,7 +218,8 @@ section{position:relative}
   }
 
   function initParticles(){
-    N = Math.min(MAXPH, Math.max(700, Math.round(W * H / 420)));
+    var c0 = (cloud.t[0] && cloud.t[0].length) || 1000;
+    N = Math.min(MAXPH, Math.max(700, Math.min(c0, 1400)));
     P = new Array(N);
     for (var i = 0; i < N; i++){
       P[i] = {
