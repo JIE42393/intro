@@ -4,107 +4,38 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="color-scheme" content="dark">
-<meta name="theme-color" content="#0B0F1E">
-<title>陈传杰 · AIoT 节点</title>
+<meta name="theme-color" content="#05070D">
+<title>陈传杰 · AIoT</title>
 <style>
 :root{
-  --bg:#0B0F1E; --panel:#11131F; --ink:#ECECED; --muted:#97989A;
-  --spark:#4FD1C5; --flow:#3B2E7E; --line:rgba(236,236,237,.13);
+  --bg:#05070D; --ink:#ECECED; --muted:#8E9196; --spark:#4FD1C5;
+  --panel:rgba(14,17,25,.74); --line:rgba(236,236,237,.12);
   --sans:'HarmonyOS Sans SC','PingFang SC','Microsoft YaHei',system-ui,sans-serif;
   --mono:'Space Grotesk','SF Mono','Cascadia Mono',Consolas,ui-monospace,monospace;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{scroll-behavior:smooth}
 body{margin:0;background:var(--bg);color:var(--ink);font:400 14px/1.75 var(--sans);overflow-x:hidden}
-.aurora{position:fixed;inset:0;z-index:0;pointer-events:none;background:
-  radial-gradient(90vw 55vw at 10% -8%,rgba(59,46,126,.62),transparent 62%),
-  radial-gradient(70vw 45vw at 100% 8%,rgba(79,209,197,.10),transparent 60%),
-  radial-gradient(110vw 70vw at 45% 70%,rgba(59,46,126,.18),transparent 72%);}
-.wrap{position:relative;z-index:2;max-width:720px;margin:0 auto;padding:0 18px}
 
-/* 顶栏 */
-.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;
-  padding:20px 0 14px;font:700 12px/1 var(--mono);letter-spacing:.12em;color:var(--muted)}
-.topbar .live{display:flex;align-items:center;gap:8px;color:var(--spark)}
-.topbar .live i{width:7px;height:7px;border-radius:50%;background:var(--spark);
-  box-shadow:0 0 10px var(--spark);animation:blink 2.4s ease-in-out infinite}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+#fx{position:fixed;inset:0;z-index:0;display:block}
+.scroll{position:relative;z-index:1}
+section{position:relative}
 
-/* 身份 */
-.ident{padding:6px 0 22px}
-.ident h1{font:700 30px/1.25 var(--sans);margin:0 0 10px;letter-spacing:-.01em}
-.ident p{margin:0;color:var(--muted);font-size:13px}
-.ident p b{color:var(--ink);font-weight:700}
+/* 满屏幕：粒子即文字，DOM 只留底部一行 */
+.act{height:100vh;height:100svh;display:flex;flex-direction:column;justify-content:flex-end;
+  padding:0 20px 48px;pointer-events:none}
+.act .cap{margin:0;font:700 13px/1.75 var(--sans);letter-spacing:.02em}
+.act .cap span{display:block;font:400 12px/1.7 var(--sans);color:var(--muted);margin-top:5px}
+.act .tip{margin:16px 0 0;font:700 11px/1.5 var(--mono);letter-spacing:.14em;color:var(--spark)}
 
-/* 通用面板：细边矩形，不是圆角卡片 */
-.panel{border:1px solid var(--line);border-radius:4px;background:rgba(17,19,31,.55);margin-bottom:14px}
-.panel-hd{display:flex;align-items:center;justify-content:space-between;gap:10px;
-  padding:10px 14px;border-bottom:1px solid var(--line);
-  font:700 11px/1 var(--mono);letter-spacing:.14em;color:var(--muted)}
-.panel-hd .v{color:var(--spark);letter-spacing:.06em}
+/* 内容区 */
+.wrap{max-width:600px;margin:0 auto;padding:56px 18px 8px}
+.panel{background:var(--panel);backdrop-filter:blur(12px);border:1px solid var(--line);
+  border-radius:6px;margin-bottom:14px}
+.ph{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;
+  border-bottom:1px solid var(--line);font:700 11px/1 var(--mono);letter-spacing:.14em;color:var(--muted)}
+.ph .v{color:var(--spark);letter-spacing:.06em}
 
-/* 主画布 */
-.stage{position:relative;height:280px;background:
-  linear-gradient(180deg,rgba(59,46,126,.14),transparent 60%)}
-.stage canvas{display:block;width:100%;height:100%}
-.stage .hint{position:absolute;left:14px;bottom:12px;font:700 11px/1.5 var(--mono);
-  letter-spacing:.08em;color:var(--muted);pointer-events:none}
-.stage .mode{position:absolute;right:14px;top:12px;font:700 11px/1 var(--mono);
-  letter-spacing:.1em;color:var(--spark)}
-
-/* 启用传感器按钮 */
-.gate{padding:14px}
-.gate button{width:100%;padding:14px;border:1px solid var(--spark);border-radius:4px;
-  background:rgba(79,209,197,.10);color:var(--spark);font:700 14px/1 var(--sans);cursor:pointer}
-.gate button:active{background:rgba(79,209,197,.22)}
-.gate p{margin:10px 0 0;font-size:12px;color:var(--muted)}
-
-/* 读数表 */
-.readout{display:grid;grid-template-columns:repeat(3,1fr)}
-.readout .cell{padding:12px 14px;border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
-.readout .cell:nth-child(3n){border-right:0}
-.readout .cell .k{font:700 10px/1.6 var(--mono);letter-spacing:.12em;color:var(--muted);display:block}
-.readout .cell .n{font:700 17px/1.4 var(--mono);color:var(--ink);display:block;margin-top:2px}
-.readout .cell .n.hot{color:var(--spark)}
-
-/* 键值行 */
-.kv{padding:4px 14px}
-.kv .r{display:flex;justify-content:space-between;gap:14px;padding:9px 0;border-bottom:1px solid var(--line);
-  font-size:13px}
-.kv .r:last-child{border-bottom:0}
-.kv .r .k{color:var(--muted);flex:0 0 auto}
-.kv .r .v{font-family:var(--mono);font-weight:700;text-align:right;word-break:break-all}
-
-/* 波形 */
-.wave{height:110px}
-.wave canvas{display:block;width:100%;height:100%}
-
-/* 链路 */
-.chain{display:flex;align-items:center;padding:14px;gap:0;overflow-x:auto}
-.chain .st{flex:1;min-width:52px;text-align:center;font:700 10px/1.5 var(--mono);
-  letter-spacing:.06em;color:var(--muted)}
-.chain .st.on{color:var(--spark)}
-.chain .st em{display:block;font-style:normal;font-size:9px;color:var(--muted);opacity:.8}
-.chain .ar{flex:0 0 14px;height:1px;background:var(--line);position:relative}
-.chain .ar.on{background:var(--spark);box-shadow:0 0 6px rgba(79,209,197,.7)}
-
-/* 列表 */
-.rows{padding:6px 14px 12px}
-.rows .it{padding:11px 0;border-bottom:1px solid var(--line);display:flex;gap:14px;align-items:baseline}
-.rows .it:last-child{border-bottom:0}
-.rows .it .k{flex:0 0 6.5em;font-weight:700;color:var(--ink);font-size:13px}
-.rows .it .v{flex:1;color:var(--muted);font-size:13px}
-.rows .it .v b{color:var(--ink);font-weight:700}
-
-.note{padding:0 14px 14px;font-size:12px;color:var(--muted);line-height:1.9}
-.note b{color:var(--spark);font-weight:700}
-.tech{padding:12px 14px}
-.tech summary{cursor:pointer;color:var(--spark);font-weight:700;font-size:13px;list-style:none}
-.tech summary::-webkit-details-marker{display:none}
-.tech summary::before{content:"▸ ";color:var(--spark)}
-.tech details[open] summary::before{content:"▾ "}
-.tech ul{margin:10px 0 2px;padding-left:18px;font-size:13px;color:var(--muted)}
-.tech li{margin:6px 0}
 .route{padding:8px 14px 4px}
 .rt{display:grid;grid-template-columns:26px 5.5em 1fr 76px;align-items:center;gap:10px;
   padding:9px 0;border-bottom:1px solid var(--line);font-size:13px}
@@ -115,6 +46,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font:400 14px/1.75 var(--san
 .rt .rb{height:4px;border-radius:2px;background:rgba(236,236,237,.10);overflow:hidden}
 .rt .rb i{display:block;height:100%;background:rgba(151,152,154,.6)}
 .rt .rb.hi i{background:var(--spark);box-shadow:0 0 8px rgba(79,209,197,.7)}
+
 .chain2{padding:12px 14px 4px}
 .c2{display:flex;justify-content:space-between;gap:14px;align-items:baseline;padding:10px 12px;
   border:1px solid var(--line);border-radius:4px;font-size:13px}
@@ -122,17 +54,29 @@ body{margin:0;background:var(--bg);color:var(--ink);font:400 14px/1.75 var(--san
 .c2 span{color:var(--muted);font-size:12px;text-align:right}
 .c2v{padding:5px 0 5px 14px;font:700 12px/1.5 var(--mono);color:var(--spark);letter-spacing:.08em}
 
-.tail{padding:26px 0 54px;text-align:center;font:700 11px/1.6 var(--mono);
+.kv{padding:4px 14px}
+.kv .r{display:flex;justify-content:space-between;gap:14px;padding:10px 0;
+  border-bottom:1px solid var(--line);font-size:13px}
+.kv .r:last-child{border-bottom:0}
+.kv .r .k{color:var(--muted);flex:0 0 auto}
+.kv .r .v{font-family:var(--mono);font-weight:700;text-align:right}
+
+.note{padding:0 14px 14px;font-size:12px;color:var(--muted);line-height:1.9}
+.note b{color:var(--spark);font-weight:700}
+
+.tech{padding:12px 14px}
+.tech summary{cursor:pointer;color:var(--spark);font-weight:700;font-size:13px;list-style:none}
+.tech summary::-webkit-details-marker{display:none}
+.tech summary::before{content:"▸ ";color:var(--spark)}
+.tech details[open] summary::before{content:"▾ "}
+.tech ul{margin:10px 0 2px;padding-left:18px;font-size:13px;color:var(--muted)}
+.tech li{margin:6px 0}
+
+.ver{padding:26px 0 54px;text-align:center;font:700 11px/1.7 var(--mono);
   letter-spacing:.16em;color:var(--muted)}
 
 @media (max-width:520px){
-  .ident h1{font-size:24px}
-  .stage{height:230px}
-  .readout{grid-template-columns:repeat(3,1fr)}
-  .readout .cell{padding:10px 12px}
-  .readout .cell .n{font-size:15px}
-  .rows .it{flex-direction:column;gap:2px}
-  .rows .it .k{flex:none}
+  .act{padding-bottom:40px}
   .rt{grid-template-columns:24px 1fr;gap:5px 10px;align-items:baseline}
   .rt .rv{grid-column:2}
   .rt .rb{grid-column:2;margin-top:4px}
@@ -140,476 +84,321 @@ body{margin:0;background:var(--bg);color:var(--ink);font:400 14px/1.75 var(--san
 </style>
 </head>
 <body>
-<div class="aurora" aria-hidden="true"></div>
+<canvas id="fx" aria-hidden="true"></canvas>
 
-<div class="wrap">
-  <div class="topbar">
-    <span class="live"><i></i>NODE ONLINE</span>
-    <span id="clock">--:--:--</span>
+<div class="scroll">
+
+  <section class="act" id="a0">
+    <p class="cap">苏州农业职业技术学院 · 物联网应用技术 · 5+0 分段培养</p>
+    <p class="tip">转一下手机，或者晃一晃 —— 下面的字会散</p>
+  </section>
+
+  <section class="act" id="a1">
+    <p class="cap">我学的是这个<span>设备 · 数据 · 判断，这条线上的每一段都要动手</span></p>
+    <p class="tip">继续往下</p>
+  </section>
+
+  <div class="wrap">
+    <div class="panel">
+      <div class="ph"><span>SKILL ROUTE</span><span class="v">方向：AIoT</span></div>
+      <div class="route">
+        <div class="rt"><span class="rn">01</span><span class="rk">编程基础</span><span class="rv">C 语言 · 正在学（专业课主线）</span><span class="rb"><i style="width:35%"></i></span></div>
+        <div class="rt"><span class="rn">02</span><span class="rk">单片机</span><span class="rv">ESP32 / STM32 · 准备上手</span><span class="rb"><i style="width:10%"></i></span></div>
+        <div class="rt"><span class="rn">03</span><span class="rk">传感器</span><span class="rv">姿态 / 加速度 · 这一页已经在读</span><span class="rb"><i style="width:45%"></i></span></div>
+        <div class="rt"><span class="rn">04</span><span class="rk">通信</span><span class="rv">串口 → Wi-Fi → MQTT · 待推进</span><span class="rb"><i style="width:12%"></i></span></div>
+        <div class="rt"><span class="rn">05</span><span class="rk">数据可视化</span><span class="rv">能独立做完 · 这一页就是</span><span class="rb hi"><i style="width:80%"></i></span></div>
+        <div class="rt"><span class="rn">06</span><span class="rk">端侧判断</span><span class="rv">滑动窗口能量法 · 这一页正在跑</span><span class="rb hi"><i style="width:65%"></i></span></div>
+      </div>
+      <div class="note">现在最能打的是 <b>05 / 06</b>——把设备数据变成能看、能判断的东西。<b>01–04 我正在往前赶，缺的是有人带我上手硬件和通信。</b></div>
+    </div>
+
+    <div class="panel">
+      <div class="ph"><span>HOW I SEE IT</span><span class="v">我理解的一条链</span></div>
+      <div class="chain2">
+        <div class="c2"><b>设备侧</b><span>传感器 → 采集 → 端侧预处理</span></div>
+        <div class="c2v">↓</div>
+        <div class="c2"><b>传输</b><span>串口 / Wi-Fi / MQTT</span></div>
+        <div class="c2v">↓</div>
+        <div class="c2"><b>云端</b><span>存储 → 分析 → 下发</span></div>
+        <div class="c2v">↓</div>
+        <div class="c2"><b>应用侧</b><span>看板 / 告警 / 决策</span></div>
+      </div>
+      <div class="note">这一页只做了最左边那段：本机采集 + 本机判断 + 本机画出来。<br>整条链长什么样、每一段该学什么，我心里有数。</div>
+    </div>
+
+    <div class="panel">
+      <div class="ph"><span>HOW IT WORKS</span><span class="v">技术说明</span></div>
+      <div class="tech">
+        <details>
+          <summary>这一页是怎么做出来的（点开）</summary>
+          <ul>
+            <li>屏幕上的字是粒子拼的：先把文字渲染成位图，再按像素采样出几千个坐标点当目标位</li>
+            <li>每个粒子按弹性跟随自己的目标点；手机姿态改变整体流向，晃动会打散它们，停下就重新聚拢</li>
+            <li>姿态与加速度来自设备传感器（DeviceOrientation / DeviceMotion），本地读取、本地计算</li>
+            <li>单文件、零外部依赖、断网可用；不请求任何第三方接口，也没有后端</li>
+          </ul>
+        </details>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="ph"><span>CONTACT</span><span class="v">随时找我</span></div>
+      <div class="kv">
+        <div class="r"><span class="k">微信</span><span class="v">残情久忆</span></div>
+        <div class="r"><span class="k">时间</span><span class="v">按课表排，提前说一声就能定</span></div>
+      </div>
+    </div>
+
+    <p class="ver">粒子版 v6 · 2026-09-17 · 单文件 · 零依赖</p>
   </div>
 
-  <header class="ident">
-    <h1>陈传杰</h1>
-    <p>苏州农业职业技术学院 · <b>物联网应用技术</b> · 5+0 分段培养</p>
-    <p style="margin-top:6px">你现在看的不是一页自我介绍，<b>是一个正在运行的节点</b>：它读你这台设备的传感器，在本地做判断，再把数据画出来。</p>
-  </header>
-
-  <!-- 主画布 -->
-  <div class="panel">
-    <div class="panel-hd"><span>01 / ATTITUDE</span><span class="v" id="modeTag">姿态解算</span></div>
-    <div class="stage">
-      <canvas id="stage"></canvas>
-      <span class="mode" id="mode">初始化…</span>
-      <span class="hint" id="hint">拖动屏幕可以手动转动</span>
-    </div>
-    <div class="gate" id="gate" hidden>
-      <button id="allow">启用传感器（读取本机姿态）</button>
-      <p>浏览器要求先点一下才允许读取姿态数据。点完把手机转一转、晃一晃。</p>
-    </div>
-  </div>
-
-  <!-- 实时读数 -->
-  <div class="panel">
-    <div class="panel-hd"><span>02 / TELEMETRY</span><span class="v" id="hz">采样中</span></div>
-    <div class="readout">
-      <div class="cell"><span class="k">ALPHA α</span><span class="n" id="r-a">--</span></div>
-      <div class="cell"><span class="k">BETA β</span><span class="n" id="r-b">--</span></div>
-      <div class="cell"><span class="k">GAMMA γ</span><span class="n" id="r-g">--</span></div>
-      <div class="cell"><span class="k">ACC X</span><span class="n" id="r-x">--</span></div>
-      <div class="cell"><span class="k">ACC Y</span><span class="n" id="r-y">--</span></div>
-      <div class="cell"><span class="k">ACC Z</span><span class="n" id="r-z">--</span></div>
-    </div>
-  </div>
-
-  <!-- 波形 -->
-  <div class="panel">
-    <div class="panel-hd"><span>03 / WAVEFORM</span><span class="v">最新 6 秒</span></div>
-    <div class="wave"><canvas id="wave"></canvas></div>
-  </div>
-
-  <!-- 端侧判定 + 链路 -->
-  <div class="panel">
-    <div class="panel-hd"><span>04 / EDGE INFERENCE</span><span class="v">本地计算</span></div>
-    <div class="readout">
-      <div class="cell"><span class="k">STATE</span><span class="n hot" id="state">静止</span></div>
-      <div class="cell"><span class="k">ENERGY</span><span class="n" id="energy">0.00</span></div>
-      <div class="cell"><span class="k">FRAMES</span><span class="n" id="frames">0</span></div>
-    </div>
-    <div class="chain" id="chain">
-      <span class="st on">采集<em>sensor</em></span>
-      <span class="ar on"></span>
-      <span class="st on">预处理<em>filter</em></span>
-      <span class="ar on"></span>
-      <span class="st on">端侧判定<em>edge</em></span>
-      <span class="ar on"></span>
-      <span class="st on">可视化<em>render</em></span>
-    </div>
-    <div class="note">判定不靠云端：用加速度的滑动窗口能量值区分 <b>静止 / 移动 / 晃动</b>，原始数据不出设备。<br>「采集 → 预处理 → 端侧判定 → 上行 → 可视化」这条链，是我理解的 AIoT 的基本形状。</div>
-  </div>
-
-  <!-- 设备指纹 -->
-  <div class="panel">
-    <div class="panel-hd"><span>05 / DEVICE</span><span class="v" id="devtag">本机</span></div>
-    <div class="kv">
-      <div class="r"><span class="k">系统 / 浏览器</span><span class="v" id="d-ua">--</span></div>
-      <div class="r"><span class="k">屏幕</span><span class="v" id="d-screen">--</span></div>
-      <div class="r"><span class="k">时区</span><span class="v" id="d-tz">--</span></div>
-      <div class="r"><span class="k">网络</span><span class="v" id="d-net">--</span></div>
-      <div class="r"><span class="k">电池</span><span class="v" id="d-bat">--</span></div>
-      <div class="r"><span class="k">在线时长</span><span class="v" id="d-up">00:00</span></div>
-    </div>
-  </div>
-
-  <!-- 技能路线 + 体系理解 -->
-  <div class="panel">
-    <div class="panel-hd"><span>06 / SKILL ROUTE</span><span class="v">方向：AIoT</span></div>
-    <div class="route">
-      <div class="rt"><span class="rn">01</span><span class="rk">编程基础</span><span class="rv">C 语言 · 正在学（专业课主线）</span><span class="rb"><i style="width:35%"></i></span></div>
-      <div class="rt"><span class="rn">02</span><span class="rk">单片机</span><span class="rv">ESP32 / STM32 · 准备上手</span><span class="rb"><i style="width:10%"></i></span></div>
-      <div class="rt"><span class="rn">03</span><span class="rk">传感器</span><span class="rv">姿态 / 加速度 · 这一页已经在读</span><span class="rb"><i style="width:45%"></i></span></div>
-      <div class="rt"><span class="rn">04</span><span class="rk">通信</span><span class="rv">串口 → Wi-Fi → MQTT · 待推进</span><span class="rb"><i style="width:12%"></i></span></div>
-      <div class="rt"><span class="rn">05</span><span class="rk">数据可视化</span><span class="rv">能独立做完 · 这一页就是</span><span class="rb hi"><i style="width:80%"></i></span></div>
-      <div class="rt"><span class="rn">06</span><span class="rk">端侧判断</span><span class="rv">滑动窗口能量法 · 这一页正在跑</span><span class="rb hi"><i style="width:65%"></i></span></div>
-    </div>
-    <div class="note">现在最能打的是 <b>05 / 06</b>——把设备数据变成能看、能判断的东西。<b>01–04 我正在往前赶，缺的是有人带我上手硬件和通信。</b></div>
-  </div>
-
-  <div class="panel">
-    <div class="panel-hd"><span>07 / HOW I SEE IT</span><span class="v">我理解的一条链</span></div>
-    <div class="chain2">
-      <div class="c2"><b>设备侧</b><span>传感器 → 采集 → 端侧预处理</span></div>
-      <div class="c2v">↓</div>
-      <div class="c2"><b>传输</b><span>串口 / Wi-Fi / MQTT</span></div>
-      <div class="c2v">↓</div>
-      <div class="c2"><b>云端</b><span>存储 → 分析 → 下发</span></div>
-      <div class="c2v">↓</div>
-      <div class="c2"><b>应用侧</b><span>看板 / 告警 / 决策</span></div>
-    </div>
-    <div class="note">这一页只做了最左边那段：本机采集 + 本机判断 + 本机画出来。<br>整条链长什么样、每一段该学什么，我心里有数。</div>
-  </div>
-
-  <div class="panel">
-    <div class="panel-hd"><span>07 / HOW IT WORKS</span><span class="v">技术说明</span></div>
-    <div class="tech">
-      <details>
-        <summary>这一页是怎么做出来的（点开）</summary>
-        <ul>
-          <li>三维投影是手写的：旋转矩阵 + 透视除法，没有用任何 3D 库</li>
-          <li>姿态与加速度来自设备传感器（DeviceOrientation / DeviceMotion），本地读取</li>
-          <li>端侧判定用加速度滑动窗口去均值能量法，区分静止 / 移动 / 晃动，原始数据不出设备</li>
-          <li>单文件、零外部依赖、断网可用；本机渲染，不请求任何第三方接口</li>
-          <li>部署在静态托管上，全程没有后端</li>
-        </ul>
-      </details>
-    </div>
-  </div>
-
-  <div class="panel">
-    <div class="panel-hd"><span>09 / CONTACT</span><span class="v">随时找我</span></div>
-    <div class="kv">
-      <div class="r"><span class="k">微信</span><span class="v">残情久忆</span></div>
-      <div class="r"><span class="k">时间</span><span class="v">按课表排，提前说一声就能定</span></div>
-    </div>
-  </div>
-
-  <p class="tail">— 节点持续在线 —</p>
 </div>
 
 <script>
 (function(){
   'use strict';
-  var $ = function(id){ return document.getElementById(id); };
+  var cv = document.getElementById('fx');
+  var ctx = cv.getContext('2d', { alpha: true });
+  var W = 0, H = 0, DPR = 1;
+  var N = 0;                        // 粒子数
+  var P = null;                     // 粒子数组
+  var targets = [];                 // 当前目标点 {x,y}
+  var stage = 0;                    // 0=名字 1=AIoT 2=星点
+  var WORDS = ['陈传杰', 'AIoT'];
+  var cloud = { t: [] };            // 文字点云缓存
+  var tilt = { x: 0, y: 0 };
+  var shake = 0, hasSensor = false;
+  var pointer = { x: -999, y: -999, on: false };
+  var raf = 0, running = true, ok = true;
 
-  /* ---------- 设备指纹（真实读取） ---------- */
-  function ua(c){
-    if (c.ua.indexOf('iPhone') > -1) return 'iPhone · iOS';
-    if (c.ua.indexOf('iPad') > -1) return 'iPad · iOS';
-    if (c.android) return 'Android · ' + (c.android[1] ? c.android[1] : '');
-    if (c.windows) return 'Windows';
-    if (c.mac) return 'macOS';
-    return '未知设备';
-  }
-  function plat(c){
-    if (c.ua.indexOf('MicroMessenger') > -1) return '微信内置浏览器';
-    if (c.ua.indexOf('Edg') > -1) return 'Edge';
-    if (c.ua.indexOf('Chrome') > -1) return 'Chrome';
-    if (c.ua.indexOf('Safari') > -1) return 'Safari';
-    return '浏览器';
-  }
-  var nav = navigator, scr = screen;
-  var c = { ua: nav.userAgent, android: nav.userAgent.match(/Android\s([\d.]+)/), windows: /Windows/.test(nav.userAgent), mac: /Macintosh/.test(nav.userAgent) };
-  $('d-ua').textContent = ua(c) + ' · ' + plat(c);
-  $('d-screen').textContent = scr.width + '×' + scr.height + (window.devicePixelRatio > 1 ? ' @' + window.devicePixelRatio + 'x' : '');
-  try { $('d-tz').textContent = Intl.DateTimeFormat().resolvedOptions().timeZone; } catch(e){ $('d-tz').textContent = '未知'; }
-  var conn = nav.connection || nav.mozConnection || nav.webkitConnection;
-  $('d-net').textContent = conn ? ('wifi/蜂窝 · ' + (conn.effectiveType || '--') + (conn.downlink ? ' · ' + conn.downlink + 'Mbps' : '')) : (nav.onLine ? '在线' : '离线');
-
-  if (nav.getBattery) {
-    nav.getBattery().then(function(b){
-      var t = function(){ $('d-bat').textContent = Math.round(b.level * 100) + '%' + (b.charging ? ' · 充电中' : ''); };
-      t(); b.addEventListener('levelchange', t); b.addEventListener('chargingchange', t);
-    }).catch(function(){ $('d-bat').textContent = '不可读'; });
-  } else { $('d-bat').textContent = '本浏览器不提供'; }
-
-  /* ---------- 状态 ---------- */
-  var st = {
-    alpha: 0, beta: 0, gamma: 0,
-    acc: [0, 0, 0],
-    rot: [0.35, -0.5],       // 平滑后的旋转（俯仰/偏航）
-    target: [0.35, -0.5],
-    manual: false,
-    frames: 0,
-    energy: 0,
-    state: '等待数据',
-    sensorOn: false
-  };
-
-  /* ---------- 立方体几何 ---------- */
-  var V = [[-1,-1,-1],[1,-1,-1],[1,1,-1],[-1,1,-1],[-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1]];
-  var E = [[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]];
-  var AX = [[[0,0,0],[1.55,0,0]],[[0,0,0],[0,1.55,0]],[[0,0,0],[0,0,1.55]]];
-
-  var stage = $('stage'), sctx = stage.getContext('2d'), SW = 0, SH = 0;
-  var wave = $('wave'), wctx = wave.getContext('2d'), WW = 0, WH = 0;
-  var buf = [];               // 加速度历史
-  var parts = [];             // 上行粒子
-  var BUF_MAX = 180;
+  var MAXPH = 1500;
 
   function fit(){
-    var dpr = Math.min(window.devicePixelRatio || 1, 2);
-    SW = stage.clientWidth; SH = stage.clientHeight;
-    if (SW && SH) { stage.width = SW * dpr; stage.height = SH * dpr; sctx.setTransform(dpr,0,0,dpr,0,0); }
-    WW = wave.clientWidth; WH = wave.clientHeight;
-    if (WW && WH) { wave.width = WW * dpr; wave.height = WH * dpr; wctx.setTransform(dpr,0,0,dpr,0,0); }
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    W = cv.clientWidth; H = cv.clientHeight;
+    cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    cloud.t = [];
+    buildCloud(0); buildCloud(1);
+    if (!P) initParticles();
+    setStage(stage, true);
   }
 
-  function rot(p, x, y, z){
-    var a = p[0], b = p[1], d = p[2];
-    var c1 = Math.cos(x), s1 = Math.sin(x);
-    var b1 = d * c1 - b * s1, c2 = d * s1 + b * c1;   // 绕 X
-    var c3 = a * Math.cos(y) + c2 * Math.sin(y);      // 绕 Y
-    var d3 = -a * Math.sin(y) + c2 * Math.cos(y);
-    return [c3, b1, d3];
+  /* 把文字渲染成位图，按像素采样成点云 */
+  function buildCloud(i){
+    var text = WORDS[i];
+    var s = 0.5;                                  // 半分辨率采样，够用且快
+    var cw = Math.max(2, Math.floor(W * s)), ch = Math.max(2, Math.floor(H * s));
+    var c = document.createElement('canvas');
+    c.width = cw; c.height = ch;
+    var g = c.getContext('2d');
+    g.fillStyle = '#fff';
+    g.textAlign = 'center'; g.textBaseline = 'middle';
+    var FONT = '"HarmonyOS Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif';
+    g.font = '700 100px ' + FONT;
+    var w100 = g.measureText(text).width || 100;
+    var fs = Math.min(cw * 0.86 / (w100 / 100), ch * 0.30);
+    g.font = '700 ' + Math.floor(fs) + 'px ' + FONT;
+    g.fillText(text, cw / 2, ch * 0.46);
+    var d;
+    try { d = g.getImageData(0, 0, cw, ch).data; }
+    catch (e) { ok = false; return; }
+    var pts = [];
+    var step = Math.max(2, Math.round(Math.sqrt(cw * ch / 2600)));
+    for (var y = 0; y < ch; y += step){
+      for (var x = 0; x < cw; x += step){
+        if (d[(y * cw + x) * 4 + 3] > 140) pts.push({ x: x / s, y: y / s });
+      }
+    }
+    cloud.t[i] = pts;
   }
 
-  function drawStage(){
-    if (!SW || !SH) return;
-    sctx.clearRect(0, 0, SW, SH);
-    var cx = SW / 2, cy = SH / 2, S = Math.min(SW, SH) * 0.26, D = 4.4;
-    function proj(p){
-      var q = rot(p, st.rot[0], st.rot[1], 0);
-      var k = D / (q[2] + D + 2.2);
-      return [cx + q[0] * S * k, cy + q[1] * S * k];
+  function initParticles(){
+    N = Math.min(MAXPH, Math.max(700, Math.round(W * H / 420)));
+    P = new Array(N);
+    for (var i = 0; i < N; i++){
+      P[i] = {
+        x: Math.random() * W, y: Math.random() * H,
+        vx: 0, vy: 0,
+        sx: 0, sy: 0          // 目标
+      };
     }
+  }
 
-    /* 参考地面网格 */
-    sctx.strokeStyle = 'rgba(236,236,237,.07)';
-    sctx.lineWidth = 1;
-    for (var g = -1; g <= 1; g += 0.5){
-      var a1 = proj([-1.6, 1.4, g * 1.6]), a2 = proj([1.6, 1.4, g * 1.6]);
-      var b1 = proj([g * 1.6, 1.4, -1.6]), b2 = proj([g * 1.6, 1.4, 1.6]);
-      sctx.beginPath(); sctx.moveTo(a1[0], a1[1]); sctx.lineTo(a2[0], a2[1]); sctx.stroke();
-      sctx.beginPath(); sctx.moveTo(b1[0], b1[1]); sctx.lineTo(b2[0], b2[1]); sctx.stroke();
-    }
-
-    /* 坐标轴 */
-    var cols = ['rgba(79,209,197,.85)', 'rgba(236,236,237,.5)', 'rgba(151,152,154,.55)'];
-    for (var i = 0; i < 3; i++){
-      var p0 = proj(AX[i][0]), p1 = proj(AX[i][1]);
-      sctx.strokeStyle = cols[i]; sctx.lineWidth = 1.2;
-      sctx.beginPath(); sctx.moveTo(p0[0], p0[1]); sctx.lineTo(p1[0], p1[1]); sctx.stroke();
-    }
-
-    /* 立方体：先按深度排序描边，远的后画 */
-    var pts = V.map(proj);
-    var mid = st.rot;
-    sctx.lineJoin = 'round';
-    for (var e = 0; e < E.length; e++){
-      var A = V[E[e][0]], B = V[E[e][1]];
-      var za = rot(A, mid[0], mid[1], 0)[2], zb = rot(B, mid[0], mid[1], 0)[2];
-      var depth = (za + zb) / 2;
-      var al = 0.28 + 0.55 * (1 - Math.min(1, Math.max(0, (depth + 1.7) / 3.4)));
-      sctx.strokeStyle = 'rgba(79,209,197,' + al.toFixed(3) + ')';
-      sctx.lineWidth = 1.4 + al * 1.2;
-      sctx.beginPath(); sctx.moveTo(pts[E[e][0]][0], pts[E[e][0]][1]);
-      sctx.lineTo(pts[E[e][1]][0], pts[E[e][1]][1]); sctx.stroke();
-    }
-
-    /* 顶点 */
-    for (var v = 0; v < pts.length; v++){
-      sctx.fillStyle = 'rgba(236,236,237,.75)';
-      sctx.beginPath(); sctx.arc(pts[v][0], pts[v][1], 1.8, 0, 6.2832); sctx.fill();
-    }
-
-    /* 能量环：随晃动强弱变化 */
-    var rr = 6 + Math.min(30, st.energy * 8);
-    sctx.strokeStyle = 'rgba(79,209,197,' + (0.14 + Math.min(0.5, st.energy)).toFixed(2) + ')';
-    sctx.lineWidth = 1;
-    sctx.beginPath(); sctx.arc(cx, cy, rr + 44, 0, 6.2832); sctx.stroke();
-
-    /* 上行粒子：随能量发射，模拟数据出设备 */
-    if (parts.length){
-      for (var pi = 0; pi < parts.length; pi++){
-        var pt = parts[pi];
-        var pp = proj([pt.x, pt.y, pt.z]);
-        sctx.fillStyle = 'rgba(79,209,197,' + pt.life.toFixed(3) + ')';
-        sctx.beginPath(); sctx.arc(pp[0], pp[1], pt.r, 0, 6.2832); sctx.fill();
+  function starTargets(){
+    // 星点模式：目标是缓慢漂移的随机点
+    if (!cloud.t[2] || cloud.t[2].length !== N){
+      cloud.t[2] = [];
+      for (var i = 0; i < N; i++){
+        cloud.t[2].push({ x: Math.random() * W, y: Math.random() * H, dx: (Math.random() - .5) * .18, dy: (Math.random() - .5) * .18 });
       }
     }
   }
 
-  function drawWave(){
-    if (!WW || !WH) return;
-    wctx.clearRect(0, 0, WW, WH);
-    wctx.strokeStyle = 'rgba(236,236,237,.08)';
-    wctx.lineWidth = 1;
-    [0.25, 0.5, 0.75].forEach(function(f){
-      wctx.beginPath(); wctx.moveTo(0, WH * f); wctx.lineTo(WW, WH * f); wctx.stroke();
-    });
-    var cols = ['rgba(79,209,197,.95)', 'rgba(236,236,237,.55)', 'rgba(151,152,154,.6)'];
-    for (var axis = 0; axis < 3; axis++){
-      wctx.beginPath();
-      wctx.strokeStyle = cols[axis]; wctx.lineWidth = 1.4;
-      for (var i = 0; i < buf.length; i++){
-        var x = WW * (i / (BUF_MAX - 1));
-        var val = Math.max(-14, Math.min(14, buf[i][axis]));
-        var y = WH / 2 - (val / 14) * (WH / 2 - 8);
-        if (i === 0) wctx.moveTo(x, y); else wctx.lineTo(x, y);
+  function setStage(s, hard){
+    stage = s;
+    if (s < 2){
+      var pts = cloud.t[s] || [];
+      if (!pts.length){ targets = null; return; }
+      targets = pts;
+      var m = pts.length;
+      for (var i = 0; i < N; i++){
+        var t = pts[(i * 7919) % m];            // 伪随机打散，避免整齐切片
+        P[i].sx = t.x; P[i].sy = t.y;
       }
-      wctx.stroke();
+    } else {
+      starTargets();
+      for (var j = 0; j < N; j++){ P[j].sx = cloud.t[2][j].x; P[j].sy = cloud.t[2][j].y; }
+    }
+    if (hard){
+      for (var k = 0; k < N; k++){
+        P[k].x = P[k].sx || Math.random() * W;
+        P[k].y = P[k].sy || Math.random() * H;
+      }
     }
   }
+
+  function frame(){
+    if (!ok) return;
+    ctx.clearRect(0, 0, W, H);
+    var sh = shake;
+    var ox = tilt.x * 16, oy = tilt.y * 10;
+
+    /* 星点漂移 */
+    if (stage === 2 && cloud.t[2]){
+      for (var q = 0; q < N; q++){
+        var st = cloud.t[2][q];
+        st.x += st.dx; st.y += st.dy;
+        if (st.x < 0 || st.x > W) st.dx *= -1;
+        if (st.y < 0 || st.y > H) st.dy *= -1;
+        P[q].sx = st.x; P[q].sy = st.y;
+      }
+    }
+
+    var dim = stage === 2 ? 0.55 : 1;
+    for (var i = 0; i < N; i++){
+      var p = P[i];
+      /* 弹性跟随 */
+      p.vx += (p.sx + ox - p.x) * 0.055;
+      p.vy += (p.sy + oy - p.y) * 0.055;
+      /* 晃动的散开力 */
+      if (sh > 0.01){
+        p.vx += (Math.random() - 0.5) * sh * 9;
+        p.vy += (Math.random() - 0.5) * sh * 9;
+      }
+      /* 指针 / 手指排斥 */
+      if (pointer.on){
+        var dx = p.x - pointer.x, dy = p.y - pointer.y;
+        var d2 = dx * dx + dy * dy;
+        if (d2 < 12000 && d2 > 1){
+          var f = (1 - d2 / 12000) * 1.9;
+          var dd = Math.sqrt(d2);
+          p.vx += dx / dd * f; p.vy += dy / dd * f;
+        }
+      }
+      p.vx *= 0.90; p.vy *= 0.90;
+      p.x += p.vx; p.y += p.vy;
+    }
+
+    /* 画：慢的一批暗、快的一批亮 */
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.fillStyle = 'rgba(79,209,197,' + (0.50 * dim).toFixed(2) + ')';
+    for (var a = 0; a < N; a++){
+      var pa = P[a];
+      if (pa.vx * pa.vx + pa.vy * pa.vy > 1.6) continue;
+      ctx.fillRect(pa.x, pa.y, 1.7, 1.7);
+    }
+    ctx.fillStyle = 'rgba(206,255,244,' + (0.92 * dim).toFixed(2) + ')';
+    for (var b = 0; b < N; b++){
+      var pb = P[b];
+      if (pb.vx * pb.vx + pb.vy * pb.vy <= 1.6) continue;
+      ctx.fillRect(pb.x, pb.y, 2.1, 2.1);
+    }
+    ctx.globalCompositeOperation = 'source-over';
+
+    shake *= 0.90;
+    raf = requestAnimationFrame(frame);
+  }
+  var stack = [];
 
   /* ---------- 传感器 ---------- */
+  function needPerm(){
+    return typeof DeviceOrientationEvent !== 'undefined' &&
+           typeof DeviceOrientationEvent.requestPermission === 'function';
+  }
   function onOrient(e){
-    if (e.alpha == null && e.beta == null) return;
-    st.alpha = e.alpha || 0; st.beta = e.beta || 0; st.gamma = e.gamma || 0;
-    st.sensorOn = true;
-    /* 姿态 → 旋转角（低通） */
-    st.target[0] = (e.beta || 0) * Math.PI / 180 * 0.85;
-    st.target[1] = ((e.gamma || 0) * Math.PI / 180 * 0.85) + ((e.alpha || 0) * Math.PI / 180 * 0.25);
+    if (e.beta == null && e.gamma == null) return;
+    hasSensor = true;
+    tilt.x = Math.max(-1.4, Math.min(1.4, (e.gamma || 0) / 42));
+    tilt.y = Math.max(-1.4, Math.min(1.4, (e.beta || 0) / 42));
   }
   function onMotion(e){
     var a = e.accelerationIncludingGravity || e.acceleration;
     if (!a) return;
-    st.sensorOn = true;
-    st.acc = [a.x || 0, a.y || 0, a.z || 0];
-    push();
+    hasSensor = true;
+    var mag = Math.abs(a.x || 0) + Math.abs(a.y || 0) + Math.abs(a.z || 0);
+    var s = Math.min(1, Math.max(0, (mag - 9.9) / 9));
+    if (s > shake) shake = s;
   }
-
-  function push(){
-    st.frames++;
-    buf.push([st.acc[0], st.acc[1], st.acc[2]]);
-    if (buf.length > BUF_MAX) buf.shift();
-    updateEnergy();
-  }
-
-  /* 端侧判定：加速度滑动窗口去均值能量（原始数据不出设备） */
-  function updateEnergy(){
-    if (buf.length < 4) return;
-    var n = Math.min(buf.length, 40), sum = 0, m0 = 0, m1 = 0, m2 = 0;
-    for (var i = buf.length - n; i < buf.length; i++){ m0 += buf[i][0]; m1 += buf[i][1]; m2 += buf[i][2]; }
-    m0 /= n; m1 /= n; m2 /= n;
-    for (var j = buf.length - n; j < buf.length; j++){
-      sum += Math.abs(buf[j][0]-m0) + Math.abs(buf[j][1]-m1) + Math.abs(buf[j][2]-m2);
-    }
-    st.energy = st.energy * 0.75 + (sum / n) * 0.25;
-    st.state = st.energy < 0.22 ? '静止' : (st.energy < 1.1 ? '移动' : '晃动');
-  }
-
-  /* 没有传感器时用合成数据驱动，保证页面是活的 */
-  function demoSeed(){
-    var now = Date.now();
-    for (var i = 0; i < 60; i++){
-      var tt = now - (60 - i) * 42;
-      buf.push([Math.sin(tt/420)*2.4, Math.cos(tt/530)*2.1, 9.6 + Math.sin(tt/300)*0.35]);
-    }
-    updateEnergy();
-  }
-  function manualTick(){
-    if (st.sensorOn) return;
-    st.target[1] += 0.006;
-    st.target[0] = 0.35 + Math.sin(Date.now() / 2600) * 0.22;
-    var now = Date.now();
-    buf.push([Math.sin(now/420)*3.4, Math.cos(now/530)*3.1, 9.6 + Math.sin(now/300)*0.55]);
-    if (buf.length > BUF_MAX) buf.shift();
-    st.frames++;
-    updateEnergy();
-  }
-
-  /* ---------- 主循环 ---------- */
-  var last = 0, hz = 0, hzT = 0;
-  function loop(t){
-    if (!last) last = t;
-    var dt = t - last; last = t;
-
-    if (!st.sensorOn && !st.manual) manualTick();
-
-    /* 平滑 */
-    st.rot[0] += (st.target[0] - st.rot[0]) * 0.10;
-    st.rot[1] += (st.target[1] - st.rot[1]) * 0.10;
-
-    /* 粒子：晃动越强发射越密 */
-    if (st.energy > 0.35 && parts.length < 70 && Math.random() < Math.min(0.55, st.energy * 0.35)){
-      parts.push({ x: (Math.random()-0.5)*1.6, y: (Math.random()-0.5)*1.6, z: (Math.random()-0.5)*1.6,
-                   vx: (Math.random()-0.5)*0.05, vy: -0.03 - Math.random()*0.045, vz: (Math.random()-0.5)*0.05,
-                   life: 1, r: 1 + Math.random()*1.2 });
-    }
-    for (var qi = parts.length - 1; qi >= 0; qi--){
-      var pt2 = parts[qi];
-      pt2.x += pt2.vx; pt2.y += pt2.vy; pt2.z += pt2.vz; pt2.life -= 0.018;
-      if (pt2.life <= 0) parts.splice(qi, 1);
-    }
-
-    drawStage();
-    drawWave();
-
-    /* 读数 */
-    if (Math.floor(t / 90) !== hzT){
-      hzT = Math.floor(t / 90);
-      $('r-a').textContent = st.alpha.toFixed(1) + '°';
-      $('r-b').textContent = st.beta.toFixed(1) + '°';
-      $('r-g').textContent = st.gamma.toFixed(1) + '°';
-      $('r-x').textContent = st.acc[0].toFixed(2);
-      $('r-y').textContent = st.acc[1].toFixed(2);
-      $('r-z').textContent = st.acc[2].toFixed(2);
-      $('state').textContent = st.state;
-      $('energy').textContent = st.energy.toFixed(2);
-      $('frames').textContent = st.frames;
-      hz = Math.round(1000 / Math.max(1, dt));
-      $('hz').textContent = st.sensorOn ? ('采样 ' + hz + ' Hz') : '演示模式';
-    }
-    requestAnimationFrame(loop);
-  }
-
-  /* ---------- 时钟 / 在线时长 ---------- */
-  var t0 = Date.now();
-  setInterval(function(){
-    var d = new Date();
-    $('clock').textContent = ('0'+d.getHours()).slice(-2) + ':' + ('0'+d.getMinutes()).slice(-2) + ':' + ('0'+d.getSeconds()).slice(-2);
-    var s = Math.floor((Date.now() - t0) / 1000);
-    $('d-up').textContent = ('0'+Math.floor(s/60)).slice(-2) + ':' + ('0'+(s%60)).slice(-2);
-  }, 1000);
-
-  /* ---------- 权限（iOS 需要用户手势） ---------- */
-  function needPermission(){
-    return typeof DeviceOrientationEvent !== 'undefined' &&
-           typeof DeviceOrientationEvent.requestPermission === 'function';
-  }
-  var attached = false;
   function attach(){
-    if (attached) return; attached = true;
     window.addEventListener('deviceorientation', onOrient, {passive:true});
     window.addEventListener('devicemotion', onMotion, {passive:true});
   }
   attach();
-  demoSeed();
-  /* iOS 需要用户手势才放行传感器：先静默监听，拿不到数据才提示授权 */
-  setTimeout(function(){
-    if (st.sensorOn){
-      $('mode').textContent = '传感器模式 · 实时';
-      $('modeTag').textContent = '姿态解算 · 实时';
-      return;
-    }
-    if (!needPermission()){ $('mode').textContent = '演示模式（本机无姿态传感器）'; return; }
-    $('gate').hidden = false;
-    $('mode').textContent = '待授权';
-    $('allow').addEventListener('click', function(){
+  if (needPerm()){
+    var asked = false;
+    var ask = function(){
+      if (asked) return; asked = true;
       DeviceOrientationEvent.requestPermission().then(function(r){
-        if (r === 'granted'){
-          $('gate').hidden = true;
-          $('modeTag').textContent = '姿态解算 · 实时';
-          buf.length = 0; st.frames = 0; st.energy = 0;
-        } else {
-          $('allow').textContent = '授权被拒绝 —— 以演示模式运行';
-          $('mode').textContent = '演示模式';
-        }
-      }).catch(function(){
-        $('allow').textContent = '授权失败 —— 以演示模式运行';
-        $('mode').textContent = '演示模式';
-      });
-    });
-  }, 900);
+        if (r === 'granted') { hasSensor = true; attach(); }
+        document.removeEventListener('touchend', ask);
+      }).catch(function(){});
+    };
+    document.addEventListener('touchend', ask, {passive:true});
+    document.addEventListener('click', ask);
+  }
 
-  /* ---------- 手动转动（触摸 / 鼠标） ---------- */
-  var dragging = false, lastPt = null;
-  stage.addEventListener('pointerdown', function(e){ dragging = true; lastPt = [e.clientX, e.clientY]; });
+  /* ---------- 指针 ---------- */
   window.addEventListener('pointermove', function(e){
-    if (!dragging || !lastPt) return;
-    st.manual = true;
-    st.target[1] += (e.clientX - lastPt[0]) * 0.008;
-    st.target[0] += (e.clientY - lastPt[1]) * 0.008;
-    st.target[0] = Math.max(-1.4, Math.min(1.4, st.target[0]));
-    lastPt = [e.clientX, e.clientY];
-    if (!st.sensorOn) { $('mode').textContent = '手动模式'; $('modeTag').textContent = '手动转动'; }
-  });
-  window.addEventListener('pointerup', function(){ dragging = false; lastPt = null; });
+    pointer.x = e.clientX; pointer.y = e.clientY; pointer.on = true;
+  }, {passive:true});
+  window.addEventListener('pointerleave', function(){ pointer.on = false; });
+  window.addEventListener('touchmove', function(e){
+    var t = e.touches[0];
+    if (t){ pointer.x = t.clientX; pointer.y = t.clientY; pointer.on = true; }
+  }, {passive:true});
 
-  window.addEventListener('resize', function(){ clearTimeout(window.__rz); window.__rz = setTimeout(fit, 160); });
-  document.addEventListener('visibilitychange', function(){ last = 0; });
+  /* ---------- 滚动切幕 ---------- */
+  function watch(){
+    var s0 = document.getElementById('a0');
+    var s1 = document.getElementById('a1');
+    if (!('IntersectionObserver' in window)){ setStage(0, false); return; }
+    var io = new IntersectionObserver(function(es){
+      es.forEach(function(en){
+        if (!en.isIntersecting) return;
+        var id = en.target.id;
+        if (id === 'a0') setStage(0, false);
+        else if (id === 'a1') setStage(1, false);
+      });
+    }, {threshold:.45});
+    io.observe(s0); io.observe(s1);
+
+    var io2 = new IntersectionObserver(function(es){
+      es.forEach(function(en){ if (en.isIntersecting) setStage(2, false); });
+    }, {threshold:.18});
+    var w = document.querySelector('.wrap');
+    if (w) io2.observe(w);
+  }
+
+  window.addEventListener('resize', function(){ clearTimeout(window.__rz); window.__rz = setTimeout(fit, 180); });
+  document.addEventListener('visibilitychange', function(){
+    if (document.hidden){ running = false; cancelAnimationFrame(raf); }
+    else if (!running){ running = true; frame(); }
+  });
 
   fit();
-  requestAnimationFrame(loop);
+  watch();
+  requestAnimationFrame(frame);
 })();
 </script>
 </body>
