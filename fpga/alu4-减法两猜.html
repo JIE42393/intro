@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>alu4 减法两猜 · v1</title>
+<style>
+  :root{--bg:#0f1216;--card:#171c23;--line:#252c36;--fg:#e8ecf1;--dim:#9aa5b1;
+        --ok:#4ade80;--bad:#f87171;--accent:#60a5fa}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0 auto;max-width:560px;background:var(--bg);color:var(--fg);
+       font:16px/1.65 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+       padding:20px 16px 48px}
+  h1{font-size:20px;margin:0 0 4px}
+  .sub{color:var(--dim);font-size:13px;margin-bottom:22px}
+  h2{font-size:15px;color:var(--accent);margin:26px 0 10px;font-weight:600}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:12px}
+  .pick{display:flex;align-items:center;justify-content:space-between;margin:10px 0}
+  .pick .lab{font-size:14px;color:var(--dim)}
+  .pick .val{font-variant-numeric:tabular-nums;font-size:15px}
+  .pick .val b{font-size:22px;color:var(--fg)}
+  button{background:transparent;border:1px solid var(--line);color:var(--fg);
+         border-radius:8px;width:44px;height:36px;font-size:18px;line-height:1;cursor:pointer;font-family:inherit}
+  button:active{background:#20272f}
+  .stepper{display:flex;gap:8px;align-items:center}
+  .bits{display:flex;gap:6px;justify-content:center;margin:10px 0 4px;font-variant-numeric:tabular-nums}
+  .bits span{width:26px;height:30px;line-height:30px;text-align:center;border-radius:6px;
+             background:#20272f;color:var(--dim);font-weight:700}
+  .bits span.on{background:#1e3a2c;color:var(--ok)}
+  .cap{text-align:center;font-size:12px;color:var(--dim);margin-bottom:12px}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th,td{padding:9px 4px;border-bottom:1px solid var(--line);text-align:left}
+  th{color:var(--dim);font-weight:500;font-size:12px}
+  td.num{font-variant-numeric:tabular-nums;text-align:right}
+  .mark{text-align:center;font-weight:700}
+  .ok{color:var(--ok)} .bad{color:var(--bad)}
+  .verdict{margin-top:14px;font-size:14px;line-height:1.6}
+  code{background:#20272f;padding:1px 5px;border-radius:4px;font-size:13px}
+  .note{font-size:13px;color:var(--dim)}
+</style>
+</head>
+<body>
+
+<h1>alu4 减法：两种猜法，谁对</h1>
+<div class="sub">v1 · 2026-10-31 · 自己调 a 和 b，看哪种猜法错、错在哪</div>
+
+<h2>先摆清楚题目</h2>
+<div class="card note">
+  要算的是 <code>a - b</code>，但硬件里不想做减法，想用加法凑出来。<br>
+  有两种猜法：<br><br>
+  <b>猜法 A</b>：<code>a + ~b</code>　（把 b 取反，直接加）<br>
+  <b>猜法 B</b>：<code>a + ~b + 1</code>　（取反之后再加 1）<br><br>
+  这里的数都在 0~15 这一圈里转（4 根线，加到 16 就回到 0）。
+</div>
+
+<h2>调一调，看结果</h2>
+<div class="card">
+  <div class="pick">
+    <span class="lab">a =</span>
+    <span class="stepper">
+      <button onclick="bump('a',-1)">−</button>
+      <span class="val"><b id="av">6</b></span>
+      <button onclick="bump('a',1)">+</button>
+    </span>
+  </div>
+  <div class="bits" id="abits"></div>
+  <div class="cap">a 的四根线</div>
+
+  <div class="pick">
+    <span class="lab">b =</span>
+    <span class="stepper">
+      <button onclick="bump('b',-1)">−</button>
+      <span class="val"><b id="bv">2</b></span>
+      <button onclick="bump('b',1)">+</button>
+    </span>
+  </div>
+  <div class="bits" id="bbits"></div>
+  <div class="cap">b 的四根线</div>
+
+  <div class="pick">
+    <span class="lab">~b =</span>
+    <span class="val"><b id="nbv">13</b>（每根线翻过来）</span>
+  </div>
+  <div class="bits" id="nbits"></div>
+  <div class="cap">~b 的四根线</div>
+</div>
+
+<h2>三种算法对账</h2>
+<div class="card">
+  <table>
+    <tr><th>怎么算</th><th class="num">算式</th><th class="num">得数</th><th class="mark">对不对</th></tr>
+    <tr><td>真减法 a−b</td><td class="num" id="r0f"></td><td class="num" id="r0v"></td><td class="mark">标准答案</td></tr>
+    <tr><td>猜法 A：<code>a+~b</code></td><td class="num" id="r1f"></td><td class="num" id="r1v"></td><td class="mark" id="r1m"></td></tr>
+    <tr><td>猜法 B：<code>a+~b+1</code></td><td class="num" id="r2f"></td><td class="num" id="r2v"></td><td class="mark" id="r2m"></td></tr>
+  </table>
+  <div class="verdict" id="vd"></div>
+</div>
+
+<h2>看出来了吗</h2>
+<div class="card note">
+  不管 a、b 怎么变，<b>猜法 A 的得数永远比正确答案少 1</b>。<br><br>
+  原因就在这一句：<code>~b</code> 是「每根线翻过来」，它比 <code>-b</code> 少了 1。
+  少的那 1，就是猜法 B 里加上的那个 <code>+1</code>。<br><br>
+  所以：<b>取反 ≠ 取负</b>。取反只是翻位，翻位之后再进一位，才变成相反数。
+</div>
+
+<h2>两个极端，顺手验一下</h2>
+<div class="card">
+  <span class="note">
+    b = 0：<code>~0</code> 是 <code>1111</code>＝15。猜法 A 给 a+15，也就是 a−1 ——差 1，错；猜法 B 给 a+16，回到 a ——对。<br>
+    b = 15：<code>~15</code> 是 <code>0000</code>＝0。猜法 A 给 a+0＝a ——错；猜法 B 给 a+1，而「减 15」在模 16 里就是「加 1」——对。<br><br>
+    两个极端也一样：A 永远差 1，B 永远对。这一点与 a、b 取什么无关。
+  </span>
+</div>
+
+<script>
+var A = 6, B = 2;
+
+function bits(n, box){
+  var s = '';
+  for (var i = 3; i >= 0; i--){
+    var on = (n >> i) & 1;
+    s += '<span class="' + (on ? 'on' : '') + '">' + on + '</span>';
+  }
+  document.getElementById(box).innerHTML = s;
+}
+
+function bump(which, d){
+  if (which === 'a') A = (A + d + 16) % 16;
+  else B = (B + d + 16) % 16;
+  render();
+}
+
+function render(){
+  var nb = (~B) & 15;
+  var truth = ((A - B) % 16 + 16) % 16;
+  var ra = (A + nb) & 15;
+  var rb = (A + nb + 1) & 15;
+
+  document.getElementById('av').textContent = A;
+  document.getElementById('bv').textContent = B;
+  document.getElementById('nbv').textContent = nb;
+  bits(A, 'abits'); bits(B, 'bbits'); bits(nb, 'nbits');
+
+  document.getElementById('r0f').textContent = A + ' − ' + B;
+  document.getElementById('r0v').textContent = truth;
+  document.getElementById('r1f').textContent = A + ' + ' + nb + ' = ' + (A + nb);
+  document.getElementById('r1v').textContent = ra;
+  document.getElementById('r2f').textContent = A + ' + ' + nb + ' + 1 = ' + (A + nb + 1);
+  document.getElementById('r2v').textContent = rb;
+
+  var m1 = document.getElementById('r1m'), m2 = document.getElementById('r2m');
+  if (ra === truth){ m1.textContent = '✓'; m1.className = 'mark ok'; }
+  else { m1.textContent = '✗ 差 ' + (((truth - ra) % 16 + 16) % 16); m1.className = 'mark bad'; }
+  if (rb === truth){ m2.textContent = '✓'; m2.className = 'mark ok'; }
+  else { m2.textContent = '✗ 差 ' + (((truth - rb) % 16 + 16) % 16); m2.className = 'mark bad'; }
+
+  document.getElementById('vd').innerHTML =
+    '真答案 <b>' + truth + '</b>：猜法 A 给 ' + ra + '，猜法 B 给 ' + rb + '。' +
+    '（猜法 A 少算了 1）';
+}
+
+// 允许用 #a=15&b=0 指定初始状态，方便核对
+(function(){
+  var m = /a=(\d+)/.exec(location.hash), n = /b=(\d+)/.exec(location.hash);
+  if (m) A = Math.min(15, +m[1]);
+  if (n) B = Math.min(15, +n[1]);
+  render();
+})();
+</script>
+</body>
+</html>
