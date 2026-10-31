@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>阶段自测 5 题 · v1</title>
+<style>
+  :root{--bg:#0e1014;--card:#161a20;--line:#242a33;--fg:#e9edf2;--dim:#98a3ae;
+        --ok:#4ade80;--mid:#fbbf24;--bad:#f87171;--accent:#a78bfa}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0 auto;max-width:560px;background:var(--bg);color:var(--fg);
+       font:16px/1.65 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+       padding:20px 16px 56px}
+  h1{font-size:20px;margin:0 0 4px}
+  .sub{color:var(--dim);font-size:13px;margin-bottom:20px}
+  .rule{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;font-size:13px;color:var(--dim);margin-bottom:20px}
+  .rule b{color:var(--fg)}
+  .q{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:12px}
+  .tag{font-size:11px;color:var(--accent);letter-spacing:.04em;margin-bottom:6px}
+  .ask{font-size:15px;margin-bottom:12px}
+  code{background:#20272f;padding:1px 5px;border-radius:4px;font-size:13px}
+  .btn{display:flex;gap:8px;flex-wrap:wrap}
+  .btn button{flex:1 1 0;min-width:88px;padding:9px 4px;border-radius:9px;border:1px solid var(--line);
+              background:transparent;color:var(--dim);font-size:13px;font-family:inherit;cursor:pointer}
+  .btn button.sel{color:var(--fg);border-color:var(--accent);background:#1d1a2b}
+  .btn button.sel[data-v="2"]{border-color:var(--ok);background:#11241a}
+  .btn button.sel[data-v="1"]{border-color:var(--mid);background:#241f10}
+  .btn button.sel[data-v="0"]{border-color:var(--bad);background:#241314}
+  .rev{display:none;margin-top:12px;border-top:1px dashed var(--line);padding-top:10px;font-size:13px;color:var(--dim)}
+  .rev.on{display:block}
+  .rev b{color:var(--fg)}
+  .link{font-size:13px;color:var(--accent);background:none;border:none;padding:0;margin-top:10px;cursor:pointer;font-family:inherit}
+  .total{position:sticky;bottom:12px;background:#12161c;border:1px solid var(--line);border-radius:12px;
+         padding:14px 16px;margin-top:16px;box-shadow:0 8px 24px rgba(0,0,0,.45)}
+  .sc{font-size:15px}
+  .sc b{font-size:26px;font-variant-numeric:tabular-nums}
+  .todo{font-size:13px;color:var(--dim);margin-top:8px}
+  .todo .m{color:var(--mid)}
+  .pass{color:var(--ok)} .fail{color:var(--bad)}
+</style>
+</head>
+<body>
+
+<h1>阶段自测 · 5 题</h1>
+<div class="sub">v1 · 2026-10-31 · 自己答、自己判，立刻出分</div>
+
+<div class="rule">
+  <b>每题 0–2 分</b>：说得清为什么＝2；结论对但说不清＝1；错或答不出＝0。<br>
+  <b>过线 8 分</b>。不到 8 分，下面会告诉你要回去补哪一块。<br>
+  <div style="margin-top:8px;color:var(--dim)">前置：<code>lo</code>/<code>hi</code> 分工看题库 Q8；<code>cout</code> 看 Q5/Q6；<code>y[k]</code> 看 Q10；记法看「记法约定」。<b>语法不用管</b>——Q5 只要求说清「~b+1 等于 -b」。</div>
+<span style="color:var(--dim)">先自己答，别急着点「看答案」。</span>
+</div>
+
+<div id="list"></div>
+
+<div class="total">
+  <div class="sc">当前得分 <b id="score">—</b> / 10　<span id="verdict"></span></div>
+  <div class="todo" id="todo"></div>
+</div>
+
+<script>
+var QS = [
+  {
+    tag: 'counter4',
+    ask: '<code>rst_n</code> 是 1（没在复位），<code>cnt</code> 里存着 <code>4\'b1111</code>（示例）。来一个 <code>clk</code> 上升沿，<code>cnt</code> 变成多少？为什么？',
+    ans: '<b>4\'b0000</b>。15+1=16，写成五位是 <code>10000</code>；四根线只放得下低四位，最高那位没有线可去。',
+    mod: 'counter4（回绕与位宽）'
+  },
+  {
+    tag: 'adder4',
+    ask: '<code>a = 4\'b1100</code>、<code>b = 4\'b0111</code>（示例）。<code>sum</code> 和 <code>cout</code> 各是多少？',
+    ans: '<b>sum = 4\'b0011，cout = 1</b>。12+7=19；19 里有一个 16，去掉 16 剩 3，所以进位是 1。',
+    mod: 'adder4（进位与模 16）'
+  },
+  {
+    tag: 'mux4',
+    ask: '<code>a = 4\'b1100</code>、<code>sel = 2\'b10</code>（示例）。<code>y</code> 接到 <code>a</code> 的哪一根线上？',
+    ans: '<b>a[2]</b>。<code>sel[0]=0</code> → <code>lo=a[0]</code>、<code>hi=a[2]</code>；<code>sel[1]=1</code> → <code>y=hi</code>。',
+    mod: 'mux4（sel 两位分工）'
+  },
+  {
+    tag: 'dec3_8',
+    ask: '<code>a = 3\'d5</code>（示例）。<code>y</code> 的哪一根是 1？',
+    ans: '<b>y[5]</b>。它是「第 5 号那根」，只有它单独为 1。',
+    mod: 'dec3_8（位置 vs 数值）'
+  },
+  {
+    tag: 'alu4',
+    ask: '<code>a = 4\'b0110</code>、<code>b = 4\'b0010</code>、<code>op = 2\'b01</code>（示例）。<code>y</code> 是多少？这一支在代码里怎么写的？',
+    ans: '<b>y = 4\'b0100</b>（6−2=4）。代码里写的是 <code>y = a + ~b + 1\'b1</code>，不是 <code>a - b</code>；<code>~b+1</code> 就是 <code>-b</code>。',
+    mod: 'alu4（取反 ≠ 取负）'
+  }
+];
+
+var ans = [null, null, null, null, null];
+
+function build(){
+  var box = document.getElementById('list');
+  var html = '';
+  for (var i = 0; i < QS.length; i++){
+    var q = QS[i];
+    html += '<div class="q">'
+      + '<div class="tag">Q' + (i+1) + ' · ' + q.tag + '</div>'
+      + '<div class="ask">' + q.ask + '</div>'
+      + '<button class="link" onclick="rev(' + i + ',this)">看答案</button>'
+      + '<div class="rev" id="rev' + i + '"><b>标准答案：</b>' + q.ans + '</div>'
+      + '<div class="btn" id="btn' + i + '" style="margin-top:12px">'
+      + '  <button data-v="2" onclick="pick(' + i + ',2)">说得清 → 2</button>'
+      + '  <button data-v="1" onclick="pick(' + i + ',1)">对但说不清 → 1</button>'
+      + '  <button data-v="0" onclick="pick(' + i + ',0)">错 / 不会 → 0</button>'
+      + '</div></div>';
+  }
+  box.innerHTML = html;
+}
+
+function rev(i, btn){
+  var el = document.getElementById('rev' + i);
+  el.classList.toggle('on');
+  btn.textContent = el.classList.contains('on') ? '收起答案' : '看答案';
+}
+
+function pick(i, v){
+  ans[i] = v;
+  var btns = document.getElementById('btn' + i).children;
+  for (var k = 0; k < btns.length; k++){
+    btns[k].className = (+btns[k].dataset.v === v) ? 'sel' : '';
+  }
+  update();
+}
+
+function update(){
+  var done = 0, total = 0, weak = [];
+  for (var i = 0; i < ans.length; i++){
+    if (ans[i] === null) continue;
+    done++; total += ans[i];
+    if (ans[i] < 2) weak.push(QS[i].mod);
+  }
+  var s = document.getElementById('score');
+  var v = document.getElementById('verdict');
+  var t = document.getElementById('todo');
+
+  if (done === 0){
+    s.textContent = '—'; v.textContent = ''; t.textContent = '答完一题就点一下上面的按钮，分数会自己加。';
+    return;
+  }
+  s.textContent = total;
+  if (done < 5){
+    v.textContent = '（还有 ' + (5 - done) + ' 题没判）';
+    v.className = '';
+  } else {
+    v.textContent = total >= 8 ? '通过' : '未过线（需 8）';
+    v.className = total >= 8 ? 'pass' : 'fail';
+  }
+  t.innerHTML = weak.length === 0
+    ? '没有要回去补的模块。'
+    : '回去补：' + weak.map(function(m){ return '<span class="m">' + m + '</span>'; }).join('、')
+      + '<br><span style="color:#6f7a85">补的时候只补这一块，不要顺手开新内容。</span>';
+}
+
+build();
+update();
+
+// 便于核对：#s=2,2,1,0,2
+(function(){
+  var m = /s=([0-2,]+)/.exec(location.hash);
+  if (!m) return;
+  var parts = m[1].split(',');
+  for (var i = 0; i < 5 && i < parts.length; i++){
+    pick(i, +parts[i]);
+  }
+})();
+</script>
+</body>
+</html>
