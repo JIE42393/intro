@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>counter4 上板一页纸 · v1</title>
+<style>
+  :root{
+    --bg:#0f1216; --card:#171c23; --line:#252c36; --fg:#e8ecf1; --dim:#9aa5b1;
+    --hi:#4ade80; --lo:#3b4351; --accent:#60a5fa;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;background:var(--bg);color:var(--fg);
+       font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+       padding:20px 16px 48px;max-width:560px;margin:0 auto}
+  h1{font-size:20px;margin:0 0 4px;letter-spacing:.02em}
+  .sub{color:var(--dim);font-size:13px;margin-bottom:24px}
+  h2{font-size:15px;margin:28px 0 10px;color:var(--accent);font-weight:600}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:12px}
+  .q{font-weight:600;margin-bottom:10px}
+  .a{color:var(--dim);font-size:14px;display:none;border-top:1px dashed var(--line);padding-top:10px;margin-top:10px}
+  .a.on{display:block}
+  button{background:transparent;border:1px solid var(--line);color:var(--dim);
+         border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer;font-family:inherit}
+  button:active{background:#20272f}
+
+  /* 演示区 */
+  .bits{display:flex;gap:10px;justify-content:center;margin:6px 0 18px}
+  .bit{flex:1;text-align:center}
+  .bit .v{font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;
+          color:var(--dim);transition:color .12s}
+  .bit .v.hi{color:var(--hi)}
+  .bit .n{font-size:11px;color:var(--dim);margin-bottom:6px}
+  .tally{margin-top:8px}
+  .row{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--dim);margin:6px 0}
+  .row .name{width:52px;font-variant-numeric:tabular-nums}
+  .bar{flex:1;height:8px;background:var(--lo);border-radius:4px;overflow:hidden}
+  .bar i{display:block;height:100%;width:0;background:var(--hi);border-radius:4px;transition:width .12s}
+  .cnt{width:34px;text-align:right;font-variant-numeric:tabular-nums}
+  .verdict{margin-top:14px;font-size:13px;color:var(--hi);min-height:22px}
+
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  td,th{padding:8px 6px;border-bottom:1px solid var(--line);text-align:left}
+  th{color:var(--dim);font-weight:500;font-size:13px}
+  code{background:#20272f;padding:1px 5px;border-radius:4px;font-size:13px}
+  .note{font-size:13px;color:var(--dim)}
+  .k{color:var(--fg);font-weight:600}
+</style>
+</head>
+<body>
+
+<h1>counter4 上板一页纸</h1>
+<div class="sub">v1 · 2026-10-31 · 上板前扫一遍，卡住再翻答案</div>
+
+<h2>先说清三个词</h2>
+<div class="card note">
+  <b>一捆线</b>：<code>cnt[3:0]</code> 是一个名字带 4 个编号，这 4 根线当一整个数用。<br>
+  硬件里没有「整捆」这东西，只有一根根线——这词只是我说话方便。<br><br>
+  <b>一根线</b>：<code>cnt[1]</code> 就是其中编号 1 的那一根，它只能是 0 或 1。<br><br>
+  <b>上升沿</b>：时钟线从 0 跳到 1 的那一瞬间，计数器只在这一下动。<br><br>
+  <b>低有效</b>：这根线上的电平是 <code>0</code> 时才触发它的作用（这里是复位）。名字带 <code>_n</code> 的通常就是这个意思。
+</div>
+
+<h2>三句自检（先自己答，再点开）</h2>
+
+<div class="card">
+  <div class="q">1. <code>cnt[3:0]</code> 一共几根线？</div>
+  <button onclick="t(this)">看答案</button>
+  <div class="a">4 根，编号 0 到 3。方括号里左边是大号。</div>
+</div>
+
+<div class="card">
+  <div class="q">2. <code>cnt[1]</code> 这一根代表多少？</div>
+  <button onclick="t(this)">看答案</button>
+  <div class="a">2。四根的分量分别是 <code>cnt[0]</code>=1、<code>cnt[1]</code>=2、<code>cnt[2]</code>=4、<code>cnt[3]</code>=8。</div>
+</div>
+
+<div class="card">
+  <div class="q">3. 来一个上升沿，<code>cnt</code> 这个数怎么变？</div>
+  <button onclick="t(this)">看答案</button>
+  <div class="a">整个数 +1，不是每根各自 +1。低位从 1 翻回 0 时，才把上一位带动。</div>
+</div>
+
+<h2>它到底在怎么数（看下面跑一轮）</h2>
+<div class="card">
+  <div class="bits">
+    <div class="bit"><div class="n">cnt[3]</div><div class="v" id="v3">0</div></div>
+    <div class="bit"><div class="n">cnt[2]</div><div class="v" id="v2">0</div></div>
+    <div class="bit"><div class="n">cnt[1]</div><div class="v" id="v1">0</div></div>
+    <div class="bit"><div class="n">cnt[0]</div><div class="v" id="v0">0</div></div>
+  </div>
+
+  <div class="tally">
+    <div class="row"><span class="name">cnt[0]</span><span class="bar"><i id="b0"></i></span><span class="cnt" id="c0">0</span></div>
+    <div class="row"><span class="name">cnt[1]</span><span class="bar"><i id="b1"></i></span><span class="cnt" id="c1">0</span></div>
+    <div class="row"><span class="name">cnt[2]</span><span class="bar"><i id="b2"></i></span><span class="cnt" id="c2">0</span></div>
+    <div class="row"><span class="name">cnt[3]</span><span class="bar"><i id="b3"></i></span><span class="cnt" id="c3">0</span></div>
+  </div>
+
+  <div class="verdict" id="vd"></div>
+  <button onclick="restart()" style="margin-top:6px">再跑一轮</button>
+</div>
+<div class="note">右边数字是「这 16 步里它当了几次 1」。跑满一轮你会看到四个都停在 <b>8</b>——所以四个灯亮的时间完全一样，不存在「有的亮有的暗」。</div>
+
+<h2>引脚（这块板，别的地方不通用）</h2>
+<div class="card">
+<table>
+  <tr><th>信号</th><th>脚</th><th>说明</th></tr>
+  <tr><td><code>clk</code></td><td>P17</td><td>板载晶振 50 MHz</td></tr>
+  <tr><td><code>rst_n</code></td><td>K6</td><td>按键 PB0，<b>按下是低</b>（低有效：线上是 0 才清零）</td></tr>
+  <tr><td><code>cnt[0]</code></td><td>K2</td><td>LED0</td></tr>
+  <tr><td><code>cnt[1]</code></td><td>J2</td><td>LED1</td></tr>
+  <tr><td><code>cnt[2]</code></td><td>J3</td><td>LED2</td></tr>
+  <tr><td><code>cnt[3]</code></td><td>H4</td><td>LED3</td></tr>
+</table>
+</div>
+
+<h2>你会看到什么</h2>
+<div class="card">
+  <span class="k">下载完：</span>四个灯常亮。其实每一根都在不停地亮、灭，一亮一灭算一次，每秒 2500 万次——眼睛跟不上，看起来就像一直亮着。
+  <span class="k">按住 K6：</span>四个灯全灭——因为 <code>rst_n</code> 被拉低，<code>cnt</code> 被清成 0。<br><br>
+  <span class="k">松开：</span>立刻恢复常亮，计数器又从 0 往上数。<br><br>
+  <span class="note">看不到「在数」是正常的：50 MHz 太快，人眼大约每秒几十次以上就分不出单次闪。想看见数，得先降频——那是下一节课的事。</span>
+</div>
+
+<h2>怎样才算这关过了</h2>
+<div class="card">
+  <span class="k">灯亮不算过。</span>能用一句话说清这四件事才算：<br><br>
+  ① 哪个 <code>.v</code> 文件写了这个计数器，哪个 <code>.fdc</code> 把它的信号绑到了脚上<br>
+  ② 约束文件里哪几行把哪几根脚接到了灯上<br>
+  ③ 按 K6 为什么全灭<br>
+  ④ 灯为什么看着常亮、其实在闪<br><br>
+  <span class="note">这四句说不清，说明是照着抄的，得退回重问。</span>
+</div>
+
+<script>
+function t(btn){
+  var a = btn.nextElementSibling;
+  a.classList.toggle('on');
+  btn.textContent = a.classList.contains('on') ? '收起来' : '看答案';
+}
+
+var step = 0, tally = [0,0,0,0], timer = null;
+
+function drawBits(n){
+  for (var i = 0; i < 4; i++){
+    var bit = (n >> i) & 1;
+    var el = document.getElementById('v' + i);
+    el.textContent = bit;
+    el.className = 'v' + (bit ? ' hi' : '');
+  }
+}
+
+function drawBars(){
+  for (var j = 0; j < 4; j++){
+    document.getElementById('b' + j).style.width = (tally[j] / 16 * 100) + '%';
+    document.getElementById('c' + j).textContent = tally[j];
+  }
+}
+
+function tick(){
+  var n = step % 16;
+  for (var i = 0; i < 4; i++){
+    if ((n >> i) & 1) tally[i]++;
+  }
+  drawBits(n);
+  drawBars();
+  step++;
+  if (step >= 16){
+    clearInterval(timer); timer = null;
+    document.getElementById('vd').textContent =
+      '跑满 16 步：四根各当了 8 次 1 —— 四个灯一样亮。';
+  }
+}
+
+function restart(){
+  if (timer) clearInterval(timer);
+  step = 0; tally = [0,0,0,0];
+  document.getElementById('vd').textContent = '';
+  drawBits(0); drawBars();
+  timer = setInterval(tick, 420);
+}
+
+restart();
+</script>
+</body>
+</html>
