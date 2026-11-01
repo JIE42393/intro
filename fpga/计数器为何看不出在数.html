@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>计数器为什么「看不出在数」</title>
+<style>
+  :root{--bg:#0e1014;--panel:#161a20;--line:#242a33;--txt:#e9edf2;--dim:#98a3ae;
+        --on:#38d39f;--off:#2b313a;--accent:#5aa9ff;--warn:#ffb454}
+  *{box-sizing:border-box}
+  body{margin:0 auto;max-width:620px;padding:22px 18px 64px;background:var(--bg);color:var(--txt);
+       font:16px/1.75 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}
+  h1{font-size:22px;margin:0 0 4px;letter-spacing:.5px}
+  .sub{color:var(--dim);font-size:13px;margin-bottom:22px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px}
+  .leds{display:flex;justify-content:center;gap:18px;margin:6px 0 14px}
+  .led{width:56px;text-align:center}
+  .led .bulb{height:56px;border-radius:50%;background:var(--off);border:2px solid #333a45;
+             transition:background .06s,box-shadow .06s}
+  .led.on .bulb{background:var(--on);box-shadow:0 0 22px rgba(56,211,159,.75);border-color:var(--on)}
+  .led .name{font-size:12px;color:var(--dim);margin-top:6px}
+  .led .w{font-size:11px;color:#65707d}
+  .val{text-align:center;font-size:15px;color:var(--dim);margin-bottom:2px}
+  .val b{color:var(--accent);font-size:22px;letter-spacing:2px}
+  .bin{text-align:center;font-family:ui-monospace,Consolas,monospace;color:var(--dim);font-size:14px;margin-bottom:10px}
+  .row{display:flex;align-items:center;gap:12px;margin-top:14px}
+  .row label{font-size:13px;color:var(--dim);white-space:nowrap}
+  input[type=range]{flex:1;accent-color:var(--accent)}
+  .hz{font-family:ui-monospace,Consolas,monospace;color:var(--accent);font-size:14px;min-width:96px;text-align:right}
+  .verdict{margin-top:14px;padding:12px 14px;border-radius:10px;background:#12161b;border-left:3px solid var(--accent);
+           font-size:14.5px;line-height:1.7}
+  .verdict.blur{border-left-color:var(--warn)}
+  .verdict b{color:var(--warn)}
+  .scale{display:flex;justify-content:space-between;font-size:11px;color:#65707d;margin-top:4px}
+  .note{font-size:13.5px;color:var(--dim);line-height:1.8}
+  .note b{color:var(--txt)}
+  .k{color:var(--accent);font-family:ui-monospace,Consolas,monospace}
+  footer{margin-top:26px;font-size:12px;color:#5b6672;text-align:center}
+</style>
+</head>
+<body>
+<h1>计数器为什么「看不出在数」</h1>
+<div class="sub">v1 · 2026-11-01 · 一根滑块，从「看得见」滑到「看不见」</div>
+
+<div class="card">
+  <div class="val">现在这个数是 <b id="num">0</b></div>
+  <div class="bin" id="bin">0000 · 2 = 0000 0000</div>
+  <div class="leds">
+    <div class="led" id="l3"><div class="bulb"></div><div class="name">LED3</div><div class="w">值 8</div></div>
+    <div class="led" id="l2"><div class="bulb"></div><div class="name">LED2</div><div class="w">值 4</div></div>
+    <div class="led" id="l1"><div class="bulb"></div><div class="name">LED1</div><div class="w">值 2</div></div>
+    <div class="led" id="l0"><div class="bulb"></div><div class="name">LED0</div><div class="w">值 1</div></div>
+  </div>
+  <div class="row">
+    <label>时钟</label>
+    <input id="hz" type="range" min="0" max="100" value="18">
+    <span class="hz" id="hzOut">2 次/秒</span>
+  </div>
+  <div class="scale"><span>1 次/秒</span><span>50 次/秒（人眼极限）</span><span>500 万次/秒</span></div>
+  <div class="verdict" id="verdict">每一次翻转都被你看见了 —— 这才是「看得见它在数」。</div>
+</div>
+
+<div class="card note">
+  <b>这一页在做什么</b><br>
+  下面那四个灯就是 <span class="k">cnt[3:0]</span> 四位，亮着的值加起来就是当前这个数（LED3=8、LED2=4、LED1=2、LED0=1）。<br><br>
+  <b>为什么滑块往右滑，灯就不闪了？</b><br>
+  人眼大约每秒超过 <b>50 次</b>就跟不上，只能看到「平均亮度」。50% 占空比的方波，眼睛接收到的就是<b>半亮</b>——所以高频时它看起来像一直亮着，其实每秒翻了几百万次。<br><br>
+  <b>这就是板上那件事</b><br>
+  你板上的时钟是 50 MHz = <b>每秒 5000 万次</b>。滑块最右端也只有 500 万次，还差 10 倍。所以那块板上你永远看不到它在数 —— 不是因为坏了，是因为太快。<br><br>
+  <b>怎么让它变得看得见？</b><br>
+  把 50 MHz 降下来：数够一定次数才让它加 1，这叫<b>分频</b>。降到 2 次/秒，就是这段动画左边的样子。
+</div>
+
+<footer>陈传杰 · 同创线教学演示</footer>
+
+<script>
+(function(){
+  const MAXHZ = 5e6, MINHZ = 1;
+  const hz = document.getElementById('hz');
+  const hzOut = document.getElementById('hzOut');
+  const numEl = document.getElementById('num');
+  const binEl = document.getElementById('bin');
+  const verdict = document.getElementById('verdict');
+  const leds = [document.getElementById('l0'),document.getElementById('l1'),
+                document.getElementById('l2'),document.getElementById('l3')];
+
+  // 滑块 0..100 映射到 1Hz..5MHz（对数）
+  function sliderToHz(v){
+    const t = v/100;
+    return Math.pow(10, Math.log10(MINHZ) + t*(Math.log10(MAXHZ)-Math.log10(MINHZ)));
+  }
+  function fmtHz(f){
+    if (f < 1000) return f.toFixed(f<10?1:0) + ' 次/秒';
+    if (f < 1e6)  return (f/1000).toFixed(f<1e4?1:0) + ' 千次/秒';
+    return (f/1e6).toFixed(1) + ' 百万次/秒';
+  }
+
+  let value = 0, freq = 2, raf = null, acc = 0, last = 0, tick = 0;
+
+  function paint(showValue){
+    for (let i=0;i<4;i++) leds[i].classList.toggle('on', ((value>>i)&1) === 1);
+    if (showValue){
+      numEl.textContent = value;
+      binEl.textContent = value.toString(2).padStart(4,'0') + ' · 2 = ' +
+        [3,2,1,0].map(i=>((value>>i)&1)).join('') ;
+    }
+  }
+
+  function paintAverage(){
+    // 高频：眼睛看到的是平均值 —— 每一位 50% 占空，所以是半亮
+    for (let i=0;i<4;i++) {
+      leds[i].classList.add('on');
+      leds[i].querySelector('.bulb').style.opacity = 0.5;
+    }
+    numEl.textContent = '?';
+    binEl.textContent = '变化太快，读不出来';
+  }
+  function clearAverage(){
+    for (let i=0;i<4;i++) leds[i].querySelector('.bulb').style.opacity = 1;
+  }
+
+  function setFreq(f){
+    freq = f;
+    hzOut.textContent = fmtHz(f);
+    const visible = f <= 50;
+    clearAverage();
+    verdict.classList.toggle('blur', !visible);
+    verdict.innerHTML = visible
+      ? '每一次翻转都被你看见了 —— 这才是「看得见它在数」。'
+      : '已经超过 <b>50 次/秒</b>：眼睛跟不上，四个灯都只剩「半亮」。' +
+        '亮度和 50% 占空比有关，跟它翻得多快没关系 —— 所以它看起来像一直亮着。';
+    if (!visible) paintAverage();
+    loop();
+  }
+
+  function loop(){
+    cancelAnimationFrame(raf);
+    last = performance.now();
+    acc = 0;
+    if (freq > 50) { paintAverage(); return; }
+    function step(now){
+      const dt = now - last; last = now;
+      acc += dt/1000 * freq;
+      if (acc >= 1){
+        const n = Math.floor(acc); acc -= n;
+        value = (value + n) & 15;
+        paint(true);
+      }
+      raf = requestAnimationFrame(step);
+    }
+    raf = requestAnimationFrame(step);
+  }
+
+  hz.addEventListener('input', ()=>{
+    const f = sliderToHz(+hz.value);
+    setFreq(f < 10 ? Math.round(f*10)/10 : Math.round(f));
+  });
+
+  paint(true);
+  setFreq(2);
+})();
+</script>
+</body>
+</html>
